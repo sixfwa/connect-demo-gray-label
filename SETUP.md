@@ -68,14 +68,15 @@ vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the 
 vercel env pull                                   # refresh .env.local
 vercel deploy --prod --yes
 
-#    GitHub as the live custom provider:
-#    a) Create the connector first in the Legato UI (/connectors → "Fill GitHub endpoints",
-#       paste a placeholder Client ID if you don't have one yet) — the success alert shows
-#       the Connect callback URL (`redirectUri`).
-#    b) https://github.com/settings/developers → New OAuth App → Authorization callback URL =
-#       that redirectUri. Copy Client ID + a Client Secret.
-#    c) Remove the placeholder connector in the UI and create the real one with the GitHub
-#       Client ID/Secret (scopes: read:user). Click Connect, then Test with
+#    GitHub as the live custom provider. Connect's OAuth callback URL is the same for
+#    every connector on the team — https://connect.vercel.com/callback — so the provider
+#    app can be created up front:
+#    a) https://github.com/settings/developers → New OAuth App
+#         Homepage URL:                https://legato-connect-demo.vercel.app
+#         Authorization callback URL:  https://connect.vercel.com/callback
+#       Copy the Client ID and generate a Client Secret.
+#    b) In Legato: /connectors → "Fill GitHub endpoints", paste Client ID/Secret,
+#       scopes `read:user`, Create connector. Click Connect, then Test with
 #       https://api.github.com/user.
 #    Equivalent CLI, if you'd rather not use the form:
 #      printf '{"clientId":"…","clientSecret":"…","serverConfig":{"authorization_endpoint":"https://github.com/login/oauth/authorize","token_endpoint":"https://github.com/login/oauth/access_token"},"userAuthorization":{"enabled":true,"scopes":["read:user"]},"refreshTokens":{"enabled":true}}' > /tmp/gh.json

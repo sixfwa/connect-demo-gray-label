@@ -62,8 +62,9 @@ deployment's OIDC token — no Vercel API token in the Act 1 runtime at all.
 
 ## Act 2 — Bring-your-own API connector (~2 min)
 
-Prep (before the room fills): a GitHub OAuth App whose callback URL is the
-Connect `redirectUri` (see SETUP.md step 3), Client ID + Secret at hand.
+Prep (before the room fills): a GitHub OAuth App with callback URL
+`https://connect.vercel.com/callback` (fixed for every connector — see
+SETUP.md step 3), Client ID + Secret at hand.
 
 1. Scroll `/connectors` to **Custom connectors** — "None yet" — and the
    **Add custom connector** form.
