@@ -53,7 +53,7 @@ async function SeededConnectors() {
     })),
   );
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid gap-4 lg:grid-cols-3 sm:grid-cols-2">
       {rows.map(({ connector, status }) => (
         <ConnectorCard
           key={connector.slug}
@@ -62,6 +62,7 @@ async function SeededConnectors() {
           description={connector.description}
           uid={connector.uid}
           status={status}
+          probeUrl={connector.probeUrl}
         />
       ))}
     </div>

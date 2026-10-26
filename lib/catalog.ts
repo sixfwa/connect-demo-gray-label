@@ -14,9 +14,26 @@ export type CatalogConnector = {
   /** MCP server URL the eve agent talks to once a token exists. */
   mcpUrl: string;
   kind: "mcp";
+  /** Default URL for the Test/probe button (a user-scoped REST endpoint). */
+  probeUrl?: string;
 };
 
+export const LEDGERLINE_ORIGIN =
+  process.env.LEDGERLINE_ORIGIN ?? "https://ledgerline-mock.vercel.app";
+
 export const SEEDED_CONNECTORS: CatalogConnector[] = [
+  {
+    slug: "ledgerline",
+    name: "Ledgerline",
+    description:
+      "Legacy accounting: invoices, vendors and aging reports. Registered by URL — Connect discovered the OAuth server and registered its own client.",
+    uid:
+      process.env.CONNECT_LEDGERLINE_UID ??
+      "ledgerline-mock.vercel.app/ledgerline",
+    mcpUrl: `${LEDGERLINE_ORIGIN}/mcp`,
+    kind: "mcp",
+    probeUrl: `${LEDGERLINE_ORIGIN}/api/v1/me`,
+  },
   {
     slug: "notion",
     name: "Notion",

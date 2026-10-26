@@ -1,6 +1,10 @@
 "use client";
 
-import { useEveAgent, type EveMessagePart } from "eve/react";
+import {
+  openConversationInputs,
+  useEveAgent,
+  type EveMessagePart,
+} from "eve/react";
 import {
   AlertCircleIcon,
   CheckIcon,
@@ -38,6 +42,7 @@ export function AgentChat() {
   const [draft, setDraft] = useState("");
   const busy = agent.status === "submitted" || agent.status === "streaming";
   const resuming = agent.status === "resuming";
+  const pending = openConversationInputs(agent.data).map((i) => i.request);
 
   const submit = (text: string) => {
     const message = text.trim();
@@ -64,6 +69,38 @@ export function AgentChat() {
                 <Part key={partKey(part, i)} part={part} />
               ))}
             </article>
+          ))}
+          {pending.map((request) => (
+            <Alert key={request.requestId}>
+              <AlertCircleIcon />
+              <AlertTitle>
+                {request.kind === "tool-approval"
+                  ? "Approval required"
+                  : request.kind === "question"
+                    ? "The agent has a question"
+                    : "Session limit reached"}
+              </AlertTitle>
+              <AlertDescription className="space-y-2">
+                <p className="whitespace-pre-wrap">{request.prompt}</p>
+                <div className="flex flex-wrap gap-2">
+                  {request.options?.map((option) => (
+                    <Button
+                      key={option.id}
+                      size="sm"
+                      variant={option.id === "approve" ? "default" : "outline"}
+                      disabled={resuming}
+                      onClick={() =>
+                        void agent.respond([
+                          { requestId: request.requestId, optionId: option.id },
+                        ])
+                      }
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
+                </div>
+              </AlertDescription>
+            </Alert>
           ))}
           {agent.error && (
             <Alert variant="destructive">

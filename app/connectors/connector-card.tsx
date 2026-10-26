@@ -12,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { ConnectionStatus } from "@/lib/connect-status";
+import { ProbeTester } from "./probe-tester";
 
 export function ConnectorCard({
   slug,
@@ -19,12 +20,14 @@ export function ConnectorCard({
   description,
   uid,
   status,
+  probeUrl,
 }: {
   slug: string;
   name: string;
   description: string;
   uid: string;
   status: ConnectionStatus;
+  probeUrl?: string;
 }) {
   return (
     <Card>
@@ -49,6 +52,9 @@ export function ConnectorCard({
             title="Token request failed"
             detail={`${status.status ?? ""} ${status.code ?? ""} ${status.message}`.trim()}
           />
+        )}
+        {probeUrl && status.state !== "not_attached" && (
+          <ProbeTester connectorRef={slug} defaultProbeUrl={probeUrl} />
         )}
       </CardContent>
       <CardFooter className="gap-3">

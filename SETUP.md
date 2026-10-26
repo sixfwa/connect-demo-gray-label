@@ -59,6 +59,15 @@ vercel connect attach linear/legato-linear --yes
 #    then add agent/connections/linear.ts (copy notion.ts, change url to https://mcp.linear.app/mcp
 #    and connector to linear/legato-linear) and redeploy.
 
+# 2b. Ledgerline — the mock third-party used in Acts 2 and 3 (separate project: ../ledgerline-mock,
+#     deployed at https://ledgerline-mock.vercel.app). Register it by URL: Connect reads the
+#     discovery document and performs dynamic client registration. No browser, no secrets.
+vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
+#   → scl_GmLZ2Kqpecu77pOjFnM0Hg, UID ledgerline-mock.vercel.app/ledgerline (note: <host>/<name>, not oauth/<name>)
+vercel connect attach ledgerline-mock.vercel.app/ledgerline --yes
+#     The app defaults to that UID and origin; override with CONNECT_LEDGERLINE_UID / LEDGERLINE_ORIGIN
+#     (+ NEXT_PUBLIC_LEDGERLINE_ORIGIN for the form preset) if you deploy Ledgerline elsewhere.
+
 # 3. Act 2 — bring-your-own OAuth connectors through the REST API
 #    Management calls (create/list/delete connectors) need a team access token.
 #    Token minting still uses the deployment's OIDC token, like Act 1.
@@ -68,7 +77,11 @@ vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the 
 vercel env pull                                   # refresh .env.local
 vercel deploy --prod --yes
 
-#    GitHub as the live custom provider. Connect's OAuth callback URL is the same for
+#    Ledgerline as the BYO-client provider (default for the demo): in the form click
+#    "Fill Ledgerline endpoints" — client ID `ledgerline-connect-demo` is pre-registered on the
+#    mock — paste its STATIC_CLIENT_SECRET (set when ledgerline-mock was deployed), Create.
+#
+#    GitHub as an alternative real-world provider. Connect's OAuth callback URL is the same for
 #    every connector on the team — https://connect.vercel.com/callback — so the provider
 #    app can be created up front:
 #    a) https://github.com/settings/developers → New OAuth App

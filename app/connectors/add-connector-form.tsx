@@ -22,6 +22,18 @@ const GITHUB_PRESET = {
   scopes: "read:user",
 };
 
+// Ledgerline (the mock legacy accounting SaaS) exposes a pre-registered
+// "bring your own credentials" client. Client ID is public; paste the secret.
+const LEDGERLINE_ORIGIN =
+  process.env.NEXT_PUBLIC_LEDGERLINE_ORIGIN ?? "https://ledgerline-mock.vercel.app";
+const LEDGERLINE_PRESET = {
+  name: "Ledgerline (BYO client)",
+  authorizationEndpoint: `${LEDGERLINE_ORIGIN}/authorize`,
+  tokenEndpoint: `${LEDGERLINE_ORIGIN}/token`,
+  clientId: "ledgerline-connect-demo",
+  scopes: "invoices:read vendors:read reports:read",
+};
+
 type Created = {
   id: string;
   uid: string;
@@ -155,6 +167,14 @@ export function AddConnectorForm() {
               onClick={() => setValues((v) => ({ ...v, ...GITHUB_PRESET }))}
             >
               Fill GitHub endpoints
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setValues((v) => ({ ...v, ...LEDGERLINE_PRESET }))}
+            >
+              Fill Ledgerline endpoints
             </Button>
           </div>
 

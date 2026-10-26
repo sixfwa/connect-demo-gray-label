@@ -37,10 +37,16 @@ tokens from it."*
      consent screen, then back to **Legato's** `/connectors/callback`.
    - Say: *"Connect ran the OAuth dance server-side and stored the grant keyed
      by Dana's user id. Legato never saw a refresh token."*
-   - Honest note if asked: the intermediate authorize URL is on
-     `connect.vercel.com`. For strict white-labelling that hostname is the
-     one place Vercel's name is visible to the end user; whether a custom
-     domain is possible there is a question to take back internally.
+   - **White-label gap (be ready for the question):** the hop through
+     `connect.vercel.com/authorize/…` is not a silent redirect. It renders a
+     Vercel-styled interstitial: *"Authorize ledgerline — legato-connect-demo
+     is requesting access to ledgerline · Service · Environment: production ·
+     Cancel / Continue · Secured by Vercel Connect"*. The end user sees the
+     Vercel *project name* and the Vercel brand before the provider's consent
+     screen. Connector branding (`vercel connect update --icon/--colors`)
+     changes the icon, not the hostname or the footer. Whether this page can
+     be skipped, white-labelled or custom-domained is the single most
+     important question to take back internally for Legato.
 3. Callback page shows **Active**; click **Try it in the agent →**.
 4. On `/agent`, click the first suggestion (*create a Notion page titled
    "Acme deal summary"…*) and press **Run**.
@@ -62,44 +68,75 @@ deployment's OIDC token — no Vercel API token in the Act 1 runtime at all.
 
 ## Act 2 — Bring-your-own API connector (~2 min)
 
-Prep (before the room fills): a GitHub OAuth App with callback URL
-`https://connect.vercel.com/callback` (fixed for every connector — see
-SETUP.md step 3), Client ID + Secret at hand.
+The third party is **Ledgerline** — a mock legacy accounting SaaS we run
+ourselves at https://ledgerline-mock.vercel.app (OAuth 2.1 server with
+discovery + dynamic client registration, OAuth-protected MCP server, REST API,
+and a static-API-key "legacy" endpoint). It stands in for the finance tools
+Legato's customers actually use. GitHub remains an optional real-world
+alternative (see SETUP.md).
 
-1. Scroll `/connectors` to **Custom connectors** — "None yet" — and the
-   **Add custom connector** form.
-   - Say: *"This is Legato's own screen. Nothing here is Vercel UI. Behind it
-     is one REST call."*
-2. Click **Fill GitHub endpoints**, paste Client ID and Secret, **Create
-   connector**.
-   - Point at: the success alert with the connector UID and the callback URL;
-     the new **GitHub** card appearing above (status **Not connected**).
-   - Say: *"`POST /v1/connect/connectors` with `type: oauth`, the two
-     endpoints, and `projectId` — created and attached to this project in a
-     single request. Legato could do this for every legacy finance tool it
-     supports, from code, at onboarding time."*
-3. Click **Connect** on the GitHub card → GitHub consent → back to Legato's
-   callback page → **Active**.
-4. Back on the card, probe URL is prefilled with `https://api.github.com/user`.
-   Click **Test**.
-   - Point at: `200 OK`, the raw JSON from GitHub (`login`, `id`, …), and the
-     token preview + expiry on the right.
-   - Say: *"Two hops: Legato asked Connect for Dana's GitHub token — Connect
-     refreshed it if needed — then Legato called GitHub directly. Legato's
-     code never saw a client secret or a refresh token."*
-5. Failure-mode beat (pick one):
-   - Change the probe URL to `https://api.github.com/user/emails` (needs the
-     `user:email` scope) → **403**, GitHub's error body shown verbatim.
-   - Click **Test** on a custom connector Dana hasn't connected →
-     *"Dana has not connected this provider yet · 401 ·
-     user_authorization_required"*.
-   - Say: *"Errors are surfaced, not swallowed — the `stage` field tells you
-     whether Connect or the provider said no."*
-6. (Optional) **Remove** the connector to show the lifecycle is API-complete.
+Two ways to register a provider Vercel doesn't know about — show both:
+
+**2a. By URL (zero configuration).** Already done; show the terminal history:
+
+```bash
+vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
+#  → Connect fetched /.well-known/oauth-authorization-server, saw a
+#    registration_endpoint, and registered its own OAuth client (DCR).
+#    No app registration, no secrets, no browser. UID: ledgerline-mock.vercel.app/ledgerline
+```
+
+1. On `/connectors`, point at the **Ledgerline** card (seeded, **Not
+   connected**).
+   - Say: *"Any provider that publishes standard OAuth metadata is one command
+     — Connect discovers the endpoints and registers the client itself. For
+     a vendor that doesn't, there's the form below."*
+2. Click **Connect** → Vercel interstitial → Ledgerline consent (dated green
+   UI, Dana Whitfield prefilled, scopes in plain English) → **Approve** →
+   Legato callback → **Active**.
+3. On the card, the probe URL is prefilled with `…/api/v1/me`. Click **Test**.
+   - Point at: `200 OK`, JSON with `user: Dana Whitfield`, `scopes`,
+     `client_id` (a long DCR-issued id), `token_exp`; token preview + expiry.
+   - Say: *"Ledgerline tokens live 10 minutes on purpose. Click Test again in
+     ten minutes — Connect refreshes silently; Legato never handled a refresh
+     token."*
+
+**2b. By hand (bring your own client).** Scroll to **Add custom connector**.
+
+4. Click **Fill Ledgerline endpoints** (fills name, both endpoints, scopes,
+   and Ledgerline's pre-registered client ID), paste the client secret,
+   **Create connector**.
+   - Point at: success alert with the new UID and the callback URL
+     `https://connect.vercel.com/callback`; a second Ledgerline card appears
+     under **Custom connectors**.
+   - Say: *"Same outcome from Legato's own UI: `POST /v1/connect/connectors`
+     with `type: oauth`, explicit endpoints, your client credentials, and
+     `projectId` — created and attached in a single request. This is the path
+     for a vendor with no discovery document."*
+5. **Connect** → **Test** on the new card: same `200`, but `client_id` is now
+   `ledgerline-connect-demo` — proof it went through the BYO client.
+6. Failure-mode beat (pick one):
+   - **Test** on a card Dana hasn't connected → *"Dana has not connected this
+     provider yet · 401 · user_authorization_required"*.
+   - Change the probe URL to `…/api/v1/invoices?status=overdue` with a
+     connector created with only `vendors:read` → **403 insufficient_scope**,
+     Ledgerline's error body verbatim.
+   - Say: *"Errors are surfaced, not swallowed — `stage` tells you whether
+     Connect or the provider said no."*
+7. (Optional) Switch to `/agent`: *"List Ledgerline invoices that are overdue
+   and tell me the total."* — streamed MCP tool calls against Ledgerline. Then
+   *"Record a £500 payment on the first one"* → an **Approval required** card
+   appears (writes are gated), click Approve.
+8. (Optional) **Remove** the BYO connector to show the lifecycle is
+   API-complete.
 
 Note on the design change: the UI is shadcn/ui on its default theme (the
 brief originally said no component library; this was changed on request).
 
-## Act 3 — Legacy API-key shim (~2 min)
+## Act 3 — Legacy API key (~2 min)
 
-_To be written after Act 3 is built._
+_To be written after Act 3 is built._ Plan: Connect's native `api-key`
+connector type pointed at Ledgerline's `/legacy/*` endpoints (static
+`LEGACY_API_KEY`). The standalone `oauth-shim/` from the original brief is
+superseded — Ledgerline's own OAuth server already demonstrates "OAuth in
+front of a legacy system", and the native path is simpler.
