@@ -4,6 +4,11 @@ import { withEve } from "eve/next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  // "/" → "/connectors" at the routing layer. A page that calls redirect()
+  // during prerender trips Cache Components' instant-navigation validation.
+  async redirects() {
+    return [{ source: "/", destination: "/connectors", permanent: false }];
+  },
   turbopack: {
     rules: {
       "*.css": {
