@@ -62,7 +62,42 @@ deployment's OIDC token — no Vercel API token in the Act 1 runtime at all.
 
 ## Act 2 — Bring-your-own API connector (~2 min)
 
-_To be written after Act 2 is built._
+Prep (before the room fills): a GitHub OAuth App whose callback URL is the
+Connect `redirectUri` (see SETUP.md step 3), Client ID + Secret at hand.
+
+1. Scroll `/connectors` to **Custom connectors** — "None yet" — and the
+   **Add custom connector** form.
+   - Say: *"This is Legato's own screen. Nothing here is Vercel UI. Behind it
+     is one REST call."*
+2. Click **Fill GitHub endpoints**, paste Client ID and Secret, **Create
+   connector**.
+   - Point at: the success alert with the connector UID and the callback URL;
+     the new **GitHub** card appearing above (status **Not connected**).
+   - Say: *"`POST /v1/connect/connectors` with `type: oauth`, the two
+     endpoints, and `projectId` — created and attached to this project in a
+     single request. Legato could do this for every legacy finance tool it
+     supports, from code, at onboarding time."*
+3. Click **Connect** on the GitHub card → GitHub consent → back to Legato's
+   callback page → **Active**.
+4. Back on the card, probe URL is prefilled with `https://api.github.com/user`.
+   Click **Test**.
+   - Point at: `200 OK`, the raw JSON from GitHub (`login`, `id`, …), and the
+     token preview + expiry on the right.
+   - Say: *"Two hops: Legato asked Connect for Dana's GitHub token — Connect
+     refreshed it if needed — then Legato called GitHub directly. Legato's
+     code never saw a client secret or a refresh token."*
+5. Failure-mode beat (pick one):
+   - Change the probe URL to `https://api.github.com/user/emails` (needs the
+     `user:email` scope) → **403**, GitHub's error body shown verbatim.
+   - Click **Test** on a custom connector Dana hasn't connected →
+     *"Dana has not connected this provider yet · 401 ·
+     user_authorization_required"*.
+   - Say: *"Errors are surfaced, not swallowed — the `stage` field tells you
+     whether Connect or the provider said no."*
+6. (Optional) **Remove** the connector to show the lifecycle is API-complete.
+
+Note on the design change: the UI is shadcn/ui on its default theme (the
+brief originally said no component library; this was changed on request).
 
 ## Act 3 — Legacy API-key shim (~2 min)
 

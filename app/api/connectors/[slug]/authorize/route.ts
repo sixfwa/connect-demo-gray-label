@@ -16,21 +16,16 @@ export async function POST(
   ctx: RouteContext<"/api/connectors/[slug]/authorize">,
 ) {
   const { slug } = await ctx.params;
-  const connector = findSeeded(slug);
   const origin = publicOrigin(req);
 
-  if (!connector) {
-    return NextResponse.redirect(
-      `${origin}/connectors/callback?connector=${encodeURIComponent(slug)}&error=unknown_connector`,
-      303,
-    );
-  }
-
+  // Seeded catalog entries are addressed by slug; custom connectors (Act 2)
+  // by their Connect id (scl_…) or UID, which the SDK accepts directly.
+  const connectorUid = findSeeded(slug)?.uid ?? slug;
   const callbackUrl = `${origin}/connectors/callback?connector=${encodeURIComponent(slug)}`;
 
   try {
     const { url } = await startAuthorization(
-      connector.uid,
+      connectorUid,
       { subject: connectSubject },
       { callbackUrl },
     );

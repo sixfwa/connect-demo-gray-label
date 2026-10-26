@@ -59,13 +59,46 @@ vercel connect attach linear/legato-linear --yes
 #    then add agent/connections/linear.ts (copy notion.ts, change url to https://mcp.linear.app/mcp
 #    and connector to linear/legato-linear) and redeploy.
 
-# 3. Run locally
+# 3. Act 2 — bring-your-own OAuth connectors through the REST API
+#    Management calls (create/list/delete connectors) need a team access token.
+#    Token minting still uses the deployment's OIDC token, like Act 1.
+vercel env add VERCEL_TEAM_ID    --no-sensitive   # team_YY1Z6a3GnL8sGi39oXfbyIJu  (.vercel/project.json → orgId)
+vercel env add VERCEL_PROJECT_ID --no-sensitive   # prj_V8qrhc7HeJr77deDwgGJzxGVOkZ1 (.vercel/project.json → projectId)
+vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the team with Connect access
+vercel env pull                                   # refresh .env.local
+vercel deploy --prod --yes
+
+#    GitHub as the live custom provider:
+#    a) Create the connector first in the Legato UI (/connectors → "Fill GitHub endpoints",
+#       paste a placeholder Client ID if you don't have one yet) — the success alert shows
+#       the Connect callback URL (`redirectUri`).
+#    b) https://github.com/settings/developers → New OAuth App → Authorization callback URL =
+#       that redirectUri. Copy Client ID + a Client Secret.
+#    c) Remove the placeholder connector in the UI and create the real one with the GitHub
+#       Client ID/Secret (scopes: read:user). Click Connect, then Test with
+#       https://api.github.com/user.
+#    Equivalent CLI, if you'd rather not use the form:
+#      printf '{"clientId":"…","clientSecret":"…","serverConfig":{"authorization_endpoint":"https://github.com/login/oauth/authorize","token_endpoint":"https://github.com/login/oauth/access_token"},"userAuthorization":{"enabled":true,"scopes":["read:user"]},"refreshTokens":{"enabled":true}}' > /tmp/gh.json
+#      vercel connect create github.com --connector-type oauth --name legato-github --data @/tmp/gh.json
+#      vercel connect attach oauth/legato-github --yes
+
+# 4. Run locally
 vercel env pull            # refresh VERCEL_OIDC_TOKEN (expires after ~12h)
 pnpm dev                   # Next.js + eve agent on http://localhost:3000
 
-# 4. Deploy
+# 5. Deploy
 vercel deploy --prod
 ```
+
+## HTTP surface (Act 2)
+
+| Route | Does |
+| --- | --- |
+| `GET /api/connectors` | lists every connector attached to this project (`GET /v2/connect/projects/:id/connectors` + `GET /v1/connect/connectors/:id`) |
+| `POST /api/connectors` | creates a Custom OAuth connector (`POST /v1/connect/connectors`, `type: "oauth"`, explicit `serverConfig` endpoints, `projectId` attaches in the same call) |
+| `DELETE /api/connectors/:id` | deletes a connector |
+| `POST /api/connectors/:id/authorize` | starts user authorization for Dana (SDK `startAuthorization`, OIDC) |
+| `POST /api/connectors/:id/test` `{ probeUrl }` | mints Dana's token (SDK `getTokenResponse` → `POST /v1/connect/token/:id`) and makes one `GET probeUrl` with it; returns `stage: ok \| token \| probe` |
 
 ## Useful checks
 

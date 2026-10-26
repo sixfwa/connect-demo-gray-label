@@ -1,3 +1,4 @@
+import { getConnectorMetadata } from "@vercel/connect";
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
@@ -41,7 +42,7 @@ async function Result({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const slug = str(sp.connector);
   const error = str(sp.error);
-  const connector = slug ? findSeeded(slug) : undefined;
+  const connector = slug ? await resolveConnector(slug) : undefined;
   const status = connector ? await getConnectionStatus(connector.uid) : null;
 
   // Anything else Connect/provider appended to the return URL — shown for transparency.
@@ -97,6 +98,24 @@ async function Result({ searchParams }: { searchParams: SearchParams }) {
       </CardFooter>
     </Card>
   );
+}
+
+/**
+ * Seeded connectors are addressed by catalog slug; custom ones (Act 2) by
+ * Connect id. For the latter, read the connector's metadata with the
+ * deployment's OIDC token — no VERCEL_TOKEN needed on this path.
+ */
+async function resolveConnector(
+  slug: string,
+): Promise<{ name: string; uid: string } | undefined> {
+  const seeded = findSeeded(slug);
+  if (seeded) return seeded;
+  try {
+    const meta = await getConnectorMetadata(slug);
+    return { name: meta.name, uid: meta.uid };
+  } catch {
+    return undefined;
+  }
 }
 
 function str(v: string | string[] | undefined): string | undefined {
