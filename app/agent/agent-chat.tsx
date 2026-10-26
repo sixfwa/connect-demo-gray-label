@@ -1,7 +1,32 @@
 "use client";
 
 import { useEveAgent, type EveMessagePart } from "eve/react";
+import {
+  AlertCircleIcon,
+  CheckIcon,
+  ChevronRightIcon,
+  LoaderIcon,
+  XIcon,
+} from "lucide-react";
 import { useState } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 const SUGGESTIONS = [
   "Create a Notion page titled “Acme deal summary” with three bullet points about a fictional $120k ARR deal closing next quarter.",
@@ -12,114 +37,119 @@ export function AgentChat() {
   const agent = useEveAgent();
   const [draft, setDraft] = useState("");
   const busy = agent.status === "submitted" || agent.status === "streaming";
+  const resuming = agent.status === "resuming";
 
   const submit = (text: string) => {
     const message = text.trim();
-    if (!message || agent.status === "resuming") return;
+    if (!message || resuming) return;
     setDraft("");
     void agent.send(message, busy ? { turnPolicy: "steer" } : undefined);
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-      <section className="flex min-h-[520px] flex-col rounded-lg border border-border bg-panel">
-        <div className="flex-1 space-y-4 overflow-y-auto p-5">
+      <Card className="flex min-h-[560px] flex-col py-0">
+        <CardContent className="flex-1 space-y-5 overflow-y-auto p-6">
           {agent.data.messages.length === 0 && (
-            <p className="text-sm text-muted">
+            <p className="text-sm text-muted-foreground">
               No messages yet. Try one of the suggestions, or type a task.
             </p>
           )}
           {agent.data.messages.map((m) => (
             <article key={m.id} className="space-y-2">
-              <header className="text-[11px] uppercase tracking-wider text-muted">
+              <p className="text-xs font-medium text-muted-foreground">
                 {m.role === "user" ? "Dana" : "Legato agent"}
-              </header>
+              </p>
               {m.parts.map((part, i) => (
                 <Part key={partKey(part, i)} part={part} />
               ))}
             </article>
           ))}
           {agent.error && (
-            <div className="rounded-md border border-err/30 bg-err/5 p-3 text-xs">
-              <p className="font-medium text-err">Agent error</p>
-              <pre className="mt-1 whitespace-pre-wrap font-mono text-[11px] text-text/80">
-                {String(agent.error.message ?? agent.error)}
-              </pre>
-            </div>
+            <Alert variant="destructive">
+              <AlertCircleIcon />
+              <AlertTitle>Agent error</AlertTitle>
+              <AlertDescription>
+                <pre className="whitespace-pre-wrap font-mono text-xs">
+                  {String(agent.error.message ?? agent.error)}
+                </pre>
+              </AlertDescription>
+            </Alert>
           )}
-        </div>
-
-        <form
-          className="flex gap-2 border-t border-border p-3"
-          onSubmit={(e) => {
-            e.preventDefault();
-            submit(draft);
-          }}
-        >
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="e.g. create a Notion page summarising the Acme deal"
-            className="flex-1 rounded-md border border-border bg-panel-2 px-3 py-2 text-sm outline-none placeholder:text-muted/60 focus:border-accent"
-            disabled={agent.status === "resuming"}
-          />
-          <button
-            type="submit"
-            disabled={agent.status === "resuming" || draft.trim().length === 0}
-            className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-black hover:brightness-110 disabled:opacity-40"
+        </CardContent>
+        <CardFooter className="border-t p-3 [.border-t]:pt-3">
+          <form
+            className="flex w-full gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              submit(draft);
+            }}
           >
-            {busy ? "Steer" : "Run"}
-          </button>
-          {busy && (
-            <button
-              type="button"
-              onClick={() => void agent.cancel()}
-              className="rounded-md border border-border px-3 py-2 text-sm text-muted hover:text-text"
+            <Input
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="e.g. create a Notion page summarising the Acme deal"
+              disabled={resuming}
+            />
+            <Button
+              type="submit"
+              disabled={resuming || draft.trim().length === 0}
             >
-              Stop
-            </button>
-          )}
-        </form>
-      </section>
+              {busy ? "Steer" : "Run"}
+            </Button>
+            {busy && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void agent.cancel()}
+              >
+                Stop
+              </Button>
+            )}
+          </form>
+        </CardFooter>
+      </Card>
 
-      <aside className="space-y-4 text-sm">
-        <div className="rounded-lg border border-border bg-panel p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted">
-            Status
-          </p>
-          <p className="mt-1 font-mono text-xs">{agent.status}</p>
+      <div className="space-y-4">
+        <Card>
+          <CardHeader>
+            <CardDescription>Status</CardDescription>
+            <CardTitle className="font-mono text-sm">{agent.status}</CardTitle>
+          </CardHeader>
           {agent.session?.sessionId && (
-            <p className="mt-1 break-all font-mono text-[10px] text-muted">
-              session {agent.session.sessionId}
-            </p>
+            <CardContent>
+              <p className="break-all font-mono text-[11px] text-muted-foreground">
+                {agent.session.sessionId}
+              </p>
+            </CardContent>
           )}
-        </div>
-        <div className="rounded-lg border border-border bg-panel p-4">
-          <p className="text-[11px] uppercase tracking-wider text-muted">
-            Try
-          </p>
-          <ul className="mt-2 space-y-2">
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardDescription>Try</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
             {SUGGESTIONS.map((s) => (
-              <li key={s}>
-                <button
-                  type="button"
-                  onClick={() => submit(s)}
-                  className="text-left text-xs text-muted hover:text-text"
-                >
-                  {s}
-                </button>
-              </li>
+              <button
+                key={s}
+                type="button"
+                onClick={() => submit(s)}
+                className="block w-full rounded-md border p-2 text-left text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              >
+                {s}
+              </button>
             ))}
-          </ul>
-        </div>
-        <button
-          type="button"
+          </CardContent>
+        </Card>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full"
           onClick={() => agent.reset()}
-          className="text-xs text-muted hover:text-text"
         >
           New session
-        </button>
-      </aside>
+        </Button>
+      </div>
     </div>
   );
 }
@@ -141,20 +171,25 @@ function Part({ part }: { part: EveMessagePart }) {
       );
     case "reasoning":
       return part.text ? (
-        <details className="text-xs text-muted">
-          <summary className="cursor-pointer">Thinking</summary>
-          <p className="mt-1 whitespace-pre-wrap">{part.text}</p>
-        </details>
+        <Collapsible className="text-xs text-muted-foreground">
+          <CollapsibleTrigger className="group flex items-center gap-1">
+            <ChevronRightIcon className="size-3 transition-transform group-data-[panel-open]:rotate-90" />
+            Thinking
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <p className="mt-1 whitespace-pre-wrap">{part.text}</p>
+          </CollapsibleContent>
+        </Collapsible>
       ) : null;
     case "dynamic-tool":
       return <ToolStep part={part} />;
     case "authorization":
       return <AuthorizationPrompt part={part} />;
     case "step-start":
-      return <hr className="border-border/60" />;
+      return <Separator />;
     case "file":
       return (
-        <p className="text-xs text-muted">
+        <p className="text-xs text-muted-foreground">
           file: {part.filename ?? part.mediaType}
         </p>
       );
@@ -169,41 +204,51 @@ function ToolStep({
   part: Extract<EveMessagePart, { type: "dynamic-tool" }>;
 }) {
   const label = part.toolMetadata?.eve?.label ?? part.toolName;
-  const dotCls =
-    part.state === "output-error"
-      ? "bg-err"
-      : part.state === "output-available"
-        ? "bg-ok"
-        : "bg-warn animate-pulse";
+  const icon =
+    part.state === "output-error" ? (
+      <XIcon className="size-3.5 text-destructive" />
+    ) : part.state === "output-available" ? (
+      <CheckIcon className="size-3.5" />
+    ) : (
+      <LoaderIcon className="size-3.5 animate-spin text-muted-foreground" />
+    );
   return (
-    <div className="rounded-md border border-border bg-panel-2 p-3 text-xs">
+    <div className="rounded-lg border bg-muted/40 p-3 text-xs">
       <div className="flex items-center gap-2">
-        <span className={`inline-block h-2 w-2 rounded-full ${dotCls}`} />
+        {icon}
         <span className="font-medium">{label}</span>
-        <span className="font-mono text-[10px] text-muted">{part.state}</span>
+        <Badge variant="outline" className="ml-auto font-mono text-[10px]">
+          {part.state}
+        </Badge>
       </div>
       {part.input !== undefined && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-muted">input</summary>
-          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-text/80">
-            {safeJson(part.input)}
-          </pre>
-        </details>
+        <JsonBlock label="input" value={part.input} />
       )}
       {"output" in part && part.output !== undefined && (
-        <details className="mt-2">
-          <summary className="cursor-pointer text-muted">output</summary>
-          <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-text/80">
-            {safeJson(part.output)}
-          </pre>
-        </details>
+        <JsonBlock label="output" value={part.output} />
       )}
       {"errorText" in part && part.errorText && (
-        <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-err">
+        <pre className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-destructive">
           {part.errorText}
         </pre>
       )}
     </div>
+  );
+}
+
+function JsonBlock({ label, value }: { label: string; value: unknown }) {
+  return (
+    <Collapsible className="mt-2">
+      <CollapsibleTrigger className="group flex items-center gap-1 text-muted-foreground">
+        <ChevronRightIcon className="size-3 transition-transform group-data-[panel-open]:rotate-90" />
+        {label}
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded-md bg-background p-2 font-mono text-[11px]">
+          {safeJson(value)}
+        </pre>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
@@ -214,7 +259,7 @@ function AuthorizationPrompt({
 }) {
   if (part.state === "completed") {
     return (
-      <p className="text-xs text-muted">
+      <p className="text-xs text-muted-foreground">
         {part.outcome === "authorized"
           ? `${part.displayName} connected.`
           : `${part.displayName} authorization ${part.outcome}${
@@ -224,25 +269,30 @@ function AuthorizationPrompt({
     );
   }
   return (
-    <div className="rounded-md border border-accent/40 bg-accent/5 p-3 text-xs">
-      <p className="font-medium">{part.displayName} needs your authorization</p>
-      <p className="mt-1 text-muted">
-        {part.authorization?.instructions ?? part.description}
-      </p>
-      {part.authorization?.userCode && (
-        <code className="mt-2 block font-mono">{part.authorization.userCode}</code>
-      )}
-      {part.authorization?.url && (
-        <a
-          href={part.authorization.url}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-2 inline-block rounded-md bg-accent px-3 py-1.5 font-medium text-black"
-        >
-          Connect {part.displayName}
-        </a>
-      )}
-    </div>
+    <Alert>
+      <AlertCircleIcon />
+      <AlertTitle>{part.displayName} needs your authorization</AlertTitle>
+      <AlertDescription className="space-y-2">
+        <p>{part.authorization?.instructions ?? part.description}</p>
+        {part.authorization?.userCode && (
+          <code className="block font-mono">{part.authorization.userCode}</code>
+        )}
+        {part.authorization?.url && (
+          <Button
+            size="sm"
+            render={
+              <a
+                href={part.authorization.url}
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+          >
+            Connect {part.displayName}
+          </Button>
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }
 

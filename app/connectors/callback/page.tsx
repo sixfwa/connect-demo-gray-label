@@ -1,9 +1,21 @@
 import Link from "next/link";
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { findSeeded } from "@/lib/catalog";
 import { getConnectionStatus } from "@/lib/connect-status";
 import { ErrorNote, StatusBadge } from "../connector-card";
+
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /**
  * Legato-branded landing page after the Connect authorization flow.
@@ -13,22 +25,18 @@ import { ErrorNote, StatusBadge } from "../connector-card";
 export default function CallbackPage({
   searchParams,
 }: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
+  searchParams: SearchParams;
 }) {
   return (
     <div className="mx-auto max-w-xl">
-      <Suspense fallback={<p className="text-sm text-muted">Checking connection…</p>}>
+      <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
         <Result searchParams={searchParams} />
       </Suspense>
     </div>
   );
 }
 
-async function Result({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
+async function Result({ searchParams }: { searchParams: SearchParams }) {
   await connection();
   const sp = await searchParams;
   const slug = str(sp.connector);
@@ -42,58 +50,52 @@ async function Result({
   );
 
   return (
-    <div className="rounded-lg border border-border bg-panel p-6">
-      <p className="text-xs uppercase tracking-wider text-muted">
-        Connection result
-      </p>
-      <h1 className="mt-1 text-xl font-semibold">
-        {connector ? connector.name : slug ?? "Unknown connector"}
-      </h1>
-
-      {error && (
-        <ErrorNote title="Authorization could not be started" detail={error} />
-      )}
-
-      {status && (
-        <div className="mt-4 flex items-center gap-3">
-          <StatusBadge status={status} />
-          <span className="text-sm text-muted">
+    <Card>
+      <CardHeader>
+        <CardDescription>Connection result</CardDescription>
+        <CardTitle className="flex items-center gap-3 text-xl">
+          {connector ? connector.name : (slug ?? "Unknown connector")}
+          {status && <StatusBadge status={status} />}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {error && (
+          <ErrorNote
+            title="Authorization could not be started"
+            detail={error}
+          />
+        )}
+        {status && (
+          <p className="text-sm text-muted-foreground">
             {status.state === "active" &&
               `Connected. Legato can now act in ${connector!.name} on your behalf.`}
             {status.state === "not_connected" &&
               "The authorization did not complete. Try connecting again."}
             {status.state === "not_attached" && status.message}
             {status.state === "error" && status.message}
-          </span>
-        </div>
-      )}
-
-      {extra.length > 0 && (
-        <details className="mt-4 text-xs text-muted">
-          <summary className="cursor-pointer">Return parameters</summary>
-          <pre className="mt-2 overflow-x-auto rounded bg-panel-2 p-2 font-mono text-[11px]">
-            {JSON.stringify(Object.fromEntries(extra), null, 2)}
-          </pre>
-        </details>
-      )}
-
-      <div className="mt-6 flex gap-3">
-        <Link
-          href="/connectors"
-          className="rounded-md border border-border px-3 py-1.5 text-sm hover:bg-panel-2"
+          </p>
+        )}
+        {extra.length > 0 && (
+          <details className="text-xs text-muted-foreground">
+            <summary className="cursor-pointer">Return parameters</summary>
+            <pre className="mt-2 overflow-x-auto rounded-md bg-muted p-3 font-mono text-xs text-foreground">
+              {JSON.stringify(Object.fromEntries(extra), null, 2)}
+            </pre>
+          </details>
+        )}
+      </CardContent>
+      <CardFooter className="gap-2">
+        <Button
+          variant="outline"
+          render={<Link href="/connectors" />}
         >
           Back to connectors
-        </Link>
+        </Button>
         {status?.state === "active" && (
-          <Link
-            href="/agent"
-            className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-black hover:brightness-110"
-          >
-            Try it in the agent →
-          </Link>
+          <Button render={<Link href="/agent" />}>Try it in the agent →</Button>
         )}
-      </div>
-    </div>
+      </CardFooter>
+    </Card>
   );
 }
 

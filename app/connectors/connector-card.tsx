@@ -1,3 +1,16 @@
+import { AlertCircleIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import type { ConnectionStatus } from "@/lib/connect-status";
 
 export function ConnectorCard({
@@ -14,19 +27,21 @@ export function ConnectorCard({
   status: ConnectionStatus;
 }) {
   return (
-    <li className="flex flex-col justify-between rounded-lg border border-border bg-panel p-5">
-      <div>
-        <div className="flex items-center justify-between gap-3">
-          <h3 className="font-medium">{name}</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>{name}</CardTitle>
+        <CardDescription>{description}</CardDescription>
+        <CardAction>
           <StatusBadge status={status} />
-        </div>
-        <p className="mt-1 text-sm text-muted">{description}</p>
-        <p className="mt-2 font-mono text-[11px] text-muted/70">{uid}</p>
+        </CardAction>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <p className="font-mono text-xs text-muted-foreground">{uid}</p>
         {status.state === "not_attached" && (
           <ErrorNote
             title="Connector not attached to this project"
             detail={`${status.code ?? "error"}: ${status.message}`}
-            hint={`Run: vercel connect attach ${uid} --yes`}
+            hint={`vercel connect attach ${uid} --yes`}
           />
         )}
         {status.state === "error" && (
@@ -35,57 +50,45 @@ export function ConnectorCard({
             detail={`${status.status ?? ""} ${status.code ?? ""} ${status.message}`.trim()}
           />
         )}
-      </div>
-
-      <div className="mt-4 flex items-center gap-2">
-        {status.state === "active" ? (
-          <form action={`/api/connectors/${slug}/authorize`} method="post">
-            <button className="rounded-md border border-border px-3 py-1.5 text-xs text-muted hover:text-text">
+      </CardContent>
+      <CardFooter className="gap-3">
+        <form action={`/api/connectors/${slug}/authorize`} method="post">
+          {status.state === "active" ? (
+            <Button type="submit" variant="outline" size="sm">
               Reconnect
-            </button>
-          </form>
-        ) : (
-          <form action={`/api/connectors/${slug}/authorize`} method="post">
-            <button
-              className="rounded-md bg-accent px-3 py-1.5 text-xs font-medium text-black hover:brightness-110 disabled:opacity-40"
+            </Button>
+          ) : (
+            <Button
+              type="submit"
+              size="sm"
               disabled={status.state === "not_attached"}
             >
               Connect
-            </button>
-          </form>
-        )}
+            </Button>
+          )}
+        </form>
         {status.state === "active" && (
-          <span className="text-[11px] text-muted">
+          <span className="text-xs text-muted-foreground">
             token valid until{" "}
             {new Date(status.expiresAt).toLocaleTimeString()}
           </span>
         )}
-      </div>
-    </li>
+      </CardFooter>
+    </Card>
   );
 }
 
 export function StatusBadge({ status }: { status: ConnectionStatus }) {
-  const map = {
-    active: { label: "Active", cls: "text-ok border-ok/40 bg-ok/10" },
-    not_connected: {
-      label: "Not connected",
-      cls: "text-muted border-border bg-panel-2",
-    },
-    not_attached: {
-      label: "Not attached",
-      cls: "text-warn border-warn/40 bg-warn/10",
-    },
-    error: { label: "Error", cls: "text-err border-err/40 bg-err/10" },
-  } as const;
-  const s = map[status.state];
-  return (
-    <span
-      className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${s.cls}`}
-    >
-      {s.label}
-    </span>
-  );
+  switch (status.state) {
+    case "active":
+      return <Badge>Active</Badge>;
+    case "not_connected":
+      return <Badge variant="outline">Not connected</Badge>;
+    case "not_attached":
+      return <Badge variant="secondary">Not attached</Badge>;
+    case "error":
+      return <Badge variant="destructive">Error</Badge>;
+  }
 }
 
 export function ErrorNote({
@@ -98,12 +101,17 @@ export function ErrorNote({
   hint?: string;
 }) {
   return (
-    <div className="mt-3 rounded-md border border-err/30 bg-err/5 p-3 text-xs">
-      <p className="font-medium text-err">{title}</p>
-      <p className="mt-1 break-words font-mono text-[11px] text-text/80">
-        {detail}
-      </p>
-      {hint && <p className="mt-1 font-mono text-[11px] text-muted">{hint}</p>}
-    </div>
+    <Alert variant="destructive">
+      <AlertCircleIcon />
+      <AlertTitle>{title}</AlertTitle>
+      <AlertDescription>
+        <p className="break-words font-mono text-xs">{detail}</p>
+        {hint && (
+          <p className="font-mono text-xs text-muted-foreground">
+            Fix: {hint}
+          </p>
+        )}
+      </AlertDescription>
+    </Alert>
   );
 }

@@ -1,5 +1,6 @@
 import { connection } from "next/server";
 import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { SEEDED_CONNECTORS } from "@/lib/catalog";
 import { getConnectionStatus } from "@/lib/connect-status";
 import { ConnectorCard } from "./connector-card";
@@ -7,18 +8,16 @@ import { ConnectorCard } from "./connector-card";
 export default function ConnectorsPage() {
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold">Connectors</h1>
-        <p className="mt-1 text-sm text-muted">
+      <div className="space-y-1">
+        <h1 className="text-2xl font-semibold tracking-tight">Connectors</h1>
+        <p className="text-sm text-muted-foreground">
           Connect the systems you want Legato to deploy into. Credentials are
           never stored by Legato.
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-xs font-medium uppercase tracking-wider text-muted">
-          Available
-        </h2>
+        <h2 className="text-sm font-medium text-muted-foreground">Available</h2>
         <Suspense fallback={<CardsSkeleton count={SEEDED_CONNECTORS.length} />}>
           <SeededConnectors />
         </Suspense>
@@ -37,7 +36,7 @@ async function SeededConnectors() {
     })),
   );
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2">
       {rows.map(({ connector, status }) => (
         <ConnectorCard
           key={connector.slug}
@@ -48,19 +47,16 @@ async function SeededConnectors() {
           status={status}
         />
       ))}
-    </ul>
+    </div>
   );
 }
 
 function CardsSkeleton({ count }: { count: number }) {
   return (
-    <ul className="grid gap-3 sm:grid-cols-2">
+    <div className="grid gap-4 sm:grid-cols-2">
       {Array.from({ length: count }).map((_, i) => (
-        <li
-          key={i}
-          className="h-32 animate-pulse rounded-lg border border-border bg-panel"
-        />
+        <Skeleton key={i} className="h-44 rounded-xl" />
       ))}
-    </ul>
+    </div>
   );
 }
