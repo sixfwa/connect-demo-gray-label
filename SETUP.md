@@ -37,7 +37,7 @@ pnpm install
 vercel link --scope rthm-unbundled-vtest314 --project legato-connect-demo --yes
 #   → creates the project if missing, writes .vercel/project.json and .env.local (VERCEL_OIDC_TOKEN)
 
-# 2. Act 1 — out-of-the-box MCP connectors
+# 2. Act 1 — out-of-the-box connectors
 #    See what Notion supports (products, connection methods, required credentials):
 vercel connect create notion --help
 #    Create the Notion MCP connector. "mcp" is an automatic-registration method:
@@ -51,14 +51,20 @@ vercel connect attach notion/legato-notion --yes
 vercel connect list
 
 
-# 2b. Ledgerline — the mock third-party used in Acts 2 and 3 (separate project: ../ledgerline-mock,
-#     deployed at https://ledgerline-mock.vercel.app). Register it by URL: Connect reads the
-#     discovery document and performs dynamic client registration. No browser, no secrets.
-vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
-#   → scl_r0FFQRc2kfofdVEhHYOA, UID ledgerline-mock.vercel.app/ledgerline (note: <host>/<name>, not oauth/<name>)
-vercel connect attach ledgerline-mock.vercel.app/ledgerline --yes
-#     The app defaults to that UID and origin; override with CONNECT_LEDGERLINE_UID / LEDGERLINE_ORIGIN
-#     (+ NEXT_PUBLIC_LEDGERLINE_ORIGIN for the form preset) if you deploy Ledgerline elsewhere.
+# 2b. Massive (ex-Polygon) — out-of-the-box API-key provider, per-user keys. The catalog CLI
+#     path needs a key value up front (`--data '{"values":[{"value":"<key>"}]}'`), so for
+#     per-user keys use the REST API instead (one call, attached to the project in the same request):
+curl -X POST "https://api.vercel.com/v1/connect/connectors?teamId=$VERCEL_TEAM_ID" \
+  -H "Authorization: Bearer $VERCEL_TOKEN" -H 'content-type: application/json' \
+  -d "{\"service\":\"massive\",\"connectionMethod\":\"api-key\",\"name\":\"legato-massive\",\"projectId\":\"$VERCEL_PROJECT_ID\",\"data\":{\"subjectType\":\"user\",\"instructions\":\"Create an API key in your Massive dashboard and paste it here.\"}}"
+#   → UID massive/legato-massive (scl_3I85oPB4rdRVgAv29Osw), supportedSubjectTypes ["user"], manualCredentialInput true
+
+# 2c. Ledgerline — the mock third-party (separate project: ../ledgerline-mock, deployed at
+#     https://ledgerline-mock.vercel.app). It is NOT pre-created: Act 2 adds it live from Legato's
+#     UI ("Add custom connector → By server URL"), which calls POST /v1/connect/connectors/managed —
+#     the same thing as:
+#       vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
+#     Override LEDGERLINE_ORIGIN / NEXT_PUBLIC_LEDGERLINE_ORIGIN if you deploy the mock elsewhere.
 
 # 3. Act 2 — bring-your-own OAuth connectors through the REST API
 #    Management calls (create/list/delete connectors) need a team access token.
@@ -69,9 +75,9 @@ vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the 
 vercel env pull                                   # refresh .env.local
 vercel deploy --prod --yes
 
-#    Ledgerline as the BYO-client provider (default for the demo): in the form click
-#    "Fill Ledgerline endpoints" — client ID `ledgerline-connect-demo` is pre-registered on the
-#    mock — paste its STATIC_CLIENT_SECRET (set when ledgerline-mock was deployed), Create.
+#    Ledgerline via the manual tab ("Endpoints + client credentials"): "Fill Ledgerline (BYO client)"
+#    — client ID `ledgerline-connect-demo` is pre-registered on the mock — paste its
+#    STATIC_CLIENT_SECRET (set when ledgerline-mock was deployed), Create.
 #
 #    GitHub as an alternative real-world provider. Connect's OAuth callback URL is the same for
 #    every connector on the team — https://connect.vercel.com/callback — so the provider
@@ -101,7 +107,9 @@ vercel deploy --prod
 | Route | Does |
 | --- | --- |
 | `GET /api/connectors` | lists every connector attached to this project (`GET /v2/connect/projects/:id/connectors` + `GET /v1/connect/connectors/:id`) |
-| `POST /api/connectors` | creates a Custom OAuth connector (`POST /v1/connect/connectors`, `type: "oauth"`, explicit `serverConfig` endpoints, `projectId` attaches in the same call) |
+| `GET /api/connectors?discover=<url>` | what Connect discovers about a server URL (`GET /v1/connect/services/{url}`) |
+| `POST /api/connectors` `{mode:"url"}` | creates a managed connector from a URL — Connect performs DCR (`POST /v1/connect/connectors/managed?autoinstall=true`, undocumented but used by the CLI) |
+| `POST /api/connectors` `{mode:"manual"}` | creates a Custom OAuth connector (`POST /v1/connect/connectors`, `type: "oauth"`, explicit `serverConfig` endpoints, `projectId` attaches in the same call) |
 | `DELETE /api/connectors/:id` | deletes a connector |
 | `POST /api/connectors/:id/authorize` | starts user authorization for Dana (SDK `startAuthorization`, OIDC) |
 | `POST /api/connectors/:id/test` `{ probeUrl }` | mints Dana's token (SDK `getTokenResponse` → `POST /v1/connect/token/:id`) and makes one `GET probeUrl` with it; returns `stage: ok \| token \| probe` |

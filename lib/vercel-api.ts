@@ -136,6 +136,75 @@ export async function createOAuthConnector(
   });
 }
 
+/** What Connect discovered about a server URL (subset we render). */
+export type DiscoveredService = {
+  service: string;
+  name: string;
+  supportsManagedCreation: boolean;
+  supportedSubjectTypes: string[];
+  discovery?: {
+    serverUrl?: string;
+    type?: {
+      type: string;
+      data?: {
+        serverConfig?: {
+          issuer?: string;
+          authorization_endpoint?: string;
+          token_endpoint?: string;
+          registration_endpoint?: string;
+          scopes_supported?: string[];
+          code_challenge_methods_supported?: string[];
+          grant_types_supported?: string[];
+        };
+      };
+    };
+  };
+};
+
+/**
+ * GET /v1/connect/services/{url} — ask Connect what it can discover about an
+ * OAuth / MCP server URL (RFC 8414 metadata, DCR support, scopes). Same call
+ * the CLI makes for `vercel connect create <url>`.
+ */
+export async function discoverService(url: string): Promise<DiscoveredService> {
+  const cfg = managementConfig();
+  if (!cfg.ok) throw new VercelApiError(`Missing env: ${cfg.missing.join(", ")}`, 0, "env_missing");
+  return vercelFetch<DiscoveredService>(
+    `/v1/connect/services/${encodeURIComponent(url)}`,
+    { token: cfg.token, teamId: cfg.teamId },
+  );
+}
+
+/**
+ * POST /v1/connect/connectors/managed — create a connector from a server URL
+ * alone. Connect reads the server's discovery document and registers its own
+ * OAuth client (dynamic client registration), so no client ID/secret is
+ * needed. `autoinstall=true` + `projectId` attach it to this project.
+ *
+ * Note: this is the endpoint the CLI uses for URL services; it is not in the
+ * public REST reference (only `/managed/eject` is). Observed 2026-10-27.
+ */
+export async function createManagedConnector(input: {
+  name: string;
+  serverUrl: string;
+}): Promise<ConnectorRecord> {
+  const cfg = managementConfig();
+  if (!cfg.ok) throw new VercelApiError(`Missing env: ${cfg.missing.join(", ")}`, 0, "env_missing");
+  return vercelFetch<ConnectorRecord>(
+    "/v1/connect/connectors/managed?autoinstall=true",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        service: input.serverUrl,
+        name: input.name,
+        projectId: cfg.projectId,
+      }),
+      token: cfg.token,
+      teamId: cfg.teamId,
+    },
+  );
+}
+
 /**
  * Create an API-key connector (Act 3 native path).
  * `subjectType: "user"` → each user pastes their own key on the Connect

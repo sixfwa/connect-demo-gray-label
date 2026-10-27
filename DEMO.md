@@ -5,137 +5,115 @@ only ever see Legato. Everything underneath is Vercel Connect, driven by the
 CLI and REST API — the Vercel dashboard is never opened.
 
 Logged-in user throughout: **Dana @ Legato** (hardcoded; her id is the Connect
-token subject).
+token subject for every token request).
+
+Cast:
+
+| Provider | Role in the story | How it got there |
+| --- | --- | --- |
+| **Notion** | Out-of-the-box OAuth/MCP provider | `vercel connect create notion --connection-method mcp` (Vercel registers the OAuth client) |
+| **Massive** (ex-Polygon, market data) | Out-of-the-box API-key provider | one REST call, `type: api-key`, per-user keys |
+| **Ledgerline** (mock legacy accounting SaaS we run) | The custom provider Legato adds live | from Legato's own UI, during the demo |
+
+Reset before the demo: on `/connectors`, **Remove** any Ledgerline card under
+*Custom connectors* so you can add it live.
 
 ---
 
-## Act 1 — Out-of-the-box MCP connector + agent (~2 min)
+## Act 1 — Out of the box (~2 min)
 
-**Setup already done (show the terminal history, don't run live):**
+Show the terminal history, don't run live:
 
 ```bash
-vercel connect create notion --help                                   # what Vercel knows about Notion
+vercel connect create notion --help                                    # what Vercel knows about Notion
 vercel connect create notion --connection-method mcp --name legato-notion --yes
-vercel connect attach notion/legato-notion --yes
+#  → Vercel registered the OAuth client for us. No Notion developer app, no secret, no browser.
 ```
 
-Say: *"Two commands. No Notion developer app, no client secret, no dashboard.
-Vercel registered the OAuth client for us ('automatic registration'). The
-connector is a team-level object; `attach` is what lets this project mint
-tokens from it."*
-
-1. Open `/connectors`.
-   - Point at: Legato branding only. Notion and Ledgerline show **Not
-     connected**.
-   - Say: *"The status isn't stored in Legato — the page asks Connect for a
-     token for Dana on each load. Connect is the system of record. If a
-     connector were missing or not attached, the card would show the raw
-     Connect error and the fix command — nothing is swallowed."*
-2. Click **Connect** on Notion.
-   - Point at: the hop to `connect.vercel.com/authorize/…`, then Notion's own
-     consent screen, then back to **Legato's** `/connectors/callback`.
+1. Open `/connectors`. Point at: Legato branding only; **Notion** and
+   **Massive** under *Available*, both **Not connected**.
+   - Say: *"Status isn't stored in Legato — each load asks Connect for a token
+     for Dana. Connect is the system of record."*
+2. **Notion → Connect** → Vercel interstitial → Notion consent → back to
+   Legato's callback → **Active** → *Try it in the agent*.
    - Say: *"Connect ran the OAuth dance server-side and stored the grant keyed
      by Dana's user id. Legato never saw a refresh token."*
-   - **White-label gap (be ready for the question):** the hop through
-     `connect.vercel.com/authorize/…` is not a silent redirect. It renders a
-     Vercel-styled interstitial: *"Authorize ledgerline — legato-connect-demo
-     is requesting access to ledgerline · Service · Environment: production ·
-     Cancel / Continue · Secured by Vercel Connect"*. The end user sees the
-     Vercel *project name* and the Vercel brand before the provider's consent
-     screen. Connector branding (`vercel connect update --icon/--colors`)
-     changes the icon, not the hostname or the footer. Whether this page can
-     be skipped, white-labelled or custom-domained is the single most
-     important question to take back internally for Legato.
-3. Callback page shows **Active**; click **Try it in the agent →**.
-4. On `/agent`, click the first suggestion (*create a Notion page titled
-   "Acme deal summary"…*) and press **Run**.
-   - Point at: streamed steps — the tool search, the `notion__…` tool call
-     with its input/output JSON, then the final message with the page link.
-   - Say: *"This is an eve agent with `defineMcpClientConnection` + Vercel
-     Connect's `connect()` helper. Before every tool call it asks Connect for
-     a token for Dana. If Dana hadn't connected Notion, you'd see an
-     authorization card right here in the chat instead of a 500."*
-5. (Optional) Go back to `/connectors` → Notion → **Reconnect** to show the
-   grant can be re-established at any time; or demonstrate the un-connected
-   path by opening `/agent` in a fresh deployment before step 2.
+3. **Massive → Add API key**. Connect shows a hosted screen with Legato's own
+   instructions; Dana pastes her Massive key → back to Legato → **Active**.
+   Click **Test** (probe `api.massive.com/v3/reference/tickers?limit=3`) →
+   `200`, raw JSON.
+   - Say: *"Massive only has API keys. We wrote nothing — Connect's `api-key`
+     connector collects each user's key and hands it back through the same
+     `getToken` call as Notion. Legato's code can't tell the difference."*
 
-What to say about the architecture (one breath): Next.js app + eve agent in
-one Vercel project (`withEve`), `@vercel/connect` SDK authenticated with the
-deployment's OIDC token — no Vercel API token in the Act 1 runtime at all.
+**White-label gap to be ready for:** the hop through
+`connect.vercel.com/authorize/…` is a Vercel-styled interstitial — *"Authorize
+notion — legato-connect-demo is requesting access… Secured by Vercel
+Connect"* — showing the Vercel brand and Legato's Vercel project name before
+the provider's screen. Connector branding flags change the icon, not this
+page. This is the number one question to take back internally.
 
 ---
 
-## Act 2 — Bring-your-own API connector (~2 min)
+## Act 2 — Add a custom provider through Connect (~2 min)
 
-The third party is **Ledgerline** — a mock legacy accounting SaaS we run
-ourselves at https://ledgerline-mock.vercel.app (OAuth 2.1 server with
-discovery + dynamic client registration, OAuth-protected MCP server, REST API,
-and a static-API-key "legacy" endpoint). It stands in for the finance tools
-Legato's customers actually use. GitHub remains an optional real-world
-alternative (see SETUP.md).
+Ledgerline stands in for the finance tools Legato's customers actually run.
 
-Two ways to register a provider Vercel doesn't know about — show both:
-
-**2a. By URL (zero configuration).** Already done; show the terminal history:
-
-```bash
-vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
-#  → Connect fetched /.well-known/oauth-authorization-server, saw a
-#    registration_endpoint, and registered its own OAuth client (DCR).
-#    No app registration, no secrets, no browser. UID: ledgerline-mock.vercel.app/ledgerline
-```
-
-1. On `/connectors`, point at the **Ledgerline** card (seeded, **Not
-   connected**).
-   - Say: *"Any provider that publishes standard OAuth metadata is one command
-     — Connect discovers the endpoints and registers the client itself. For
-     a vendor that doesn't, there's the form below."*
-2. Click **Connect** → Vercel interstitial → Ledgerline consent (dated green
-   UI, Dana Whitfield prefilled, scopes in plain English) → **Approve** →
-   Legato callback → **Active**.
-3. On the card, the probe URL is prefilled with `…/api/v1/me`. Click **Test**.
-   - Point at: `200 OK`, JSON with `user: Dana Whitfield`, `scopes`,
-     `client_id` (a long DCR-issued id), `token_exp`; token preview + expiry.
-   - Say: *"Ledgerline tokens live 10 minutes on purpose. Click Test again in
-     ten minutes — Connect refreshes silently; Legato never handled a refresh
-     token."*
-
-**2b. By hand (bring your own client).** Scroll to **Add custom connector**.
-
-4. Click **Fill Ledgerline endpoints** (fills name, both endpoints, scopes,
-   and Ledgerline's pre-registered client ID), paste the client secret,
-   **Create connector**.
-   - Point at: success alert with the new UID and the callback URL
-     `https://connect.vercel.com/callback`; a second Ledgerline card appears
-     under **Custom connectors**.
-   - Say: *"Same outcome from Legato's own UI: `POST /v1/connect/connectors`
-     with `type: oauth`, explicit endpoints, your client credentials, and
-     `projectId` — created and attached in a single request. This is the path
-     for a vendor with no discovery document."*
-5. **Connect** → **Test** on the new card: same `200`, but `client_id` is now
-   `ledgerline-connect-demo` — proof it went through the BYO client.
+1. Scroll to **Add custom connector**, tab **By server URL**. Name
+   `Ledgerline`, URL `https://ledgerline-mock.vercel.app` are prefilled.
+2. Click **Discover**.
+   - Point at: *What Connect found* — `oauth`, **automatic registration
+     (DCR)**, PKCE S256, refresh tokens, the issuer/authorize/token/register
+     endpoints, the four scopes.
+   - Say: *"Connect read Ledgerline's standard OAuth metadata. Any vendor that
+     publishes a discovery document is this easy."*
+3. Click **Create connector**.
+   - Point at: the success alert — Connect registered its own OAuth client
+     with Ledgerline and attached the connector to this project. A
+     **Ledgerline** card appears under *Custom connectors* with its
+     `ledgerline-mock.vercel.app/…` UID.
+   - Say: *"That was one API call from Legato's backend —
+     `POST /v1/connect/connectors/managed`. Same thing the CLI does."* (the
+     equivalent CLI line is printed under the button.)
+4. **Connect** → interstitial → Ledgerline's consent page (dated green UI,
+   Dana Whitfield prefilled, scopes in plain English) → **Approve** → Legato
+   callback → **Active**.
+5. **Test** (probe `…/api/v1/me` prefilled) → `200`, JSON with
+   `user: Dana Whitfield`, `scopes`, a long DCR-issued `client_id`, `token_exp`.
+   - Say: *"Ledgerline tokens live 10 minutes on purpose. Test again later —
+     Connect refreshes silently; Legato never handled a refresh token."*
 6. Failure-mode beat (pick one):
-   - **Test** on a card Dana hasn't connected → *"Dana has not connected this
-     provider yet · 401 · user_authorization_required"*.
-   - Change the probe URL to `…/api/v1/invoices?status=overdue` with a
-     connector created with only `vendors:read` → **403 insufficient_scope**,
-     Ledgerline's error body verbatim.
+   - **Discover** on `https://example.com` → `404 Service not found.` shown
+     verbatim.
+   - **Test** before connecting → *"Dana has not connected this provider yet ·
+     401 · user_authorization_required"*.
    - Say: *"Errors are surfaced, not swallowed — `stage` tells you whether
      Connect or the provider said no."*
-7. (Optional) Switch to `/agent`: *"List Ledgerline invoices that are overdue
-   and tell me the total."* — streamed MCP tool calls against Ledgerline. Then
-   *"Record a £500 payment on the first one"* → an **Approval required** card
-   appears (writes are gated), click Approve.
-8. (Optional) **Remove** the BYO connector to show the lifecycle is
-   API-complete.
+7. (If asked "what if the vendor has no discovery document?") Switch to the
+   **Endpoints + client credentials** tab, **Fill Ledgerline (BYO client)**,
+   paste the client secret, Create — the same connector via a hand-registered
+   client. GitHub preset is there too.
 
-Note on the design change: the UI is shadcn/ui on its default theme (the
-brief originally said no component library; this was changed on request).
+---
 
-## Act 3 — Legacy API key (~2 min)
+## Act 3 — The agent, across everything (~2 min)
 
-_To be written after Act 3 is built._ Plan: Connect's native `api-key`
-connector type pointed at Ledgerline's `/legacy/*` endpoints (static
-`LEGACY_API_KEY`). The standalone `oauth-shim/` from the original brief is
-superseded — Ledgerline's own OAuth server already demonstrates "OAuth in
-front of a legacy system", and the native path is simpler.
+1. `/agent`: *"List Ledgerline invoices that are overdue and tell me the
+   total."*
+   - Point at: streamed steps — tool search, `ledgerline__list_invoices` with
+     input/output JSON, the Markdown answer.
+   - Say: *"eve agent, `defineMcpClientConnection` + Connect's `connect()`
+     helper. The Ledgerline connection isn't hard-coded: at session start the
+     agent asks Connect which connectors this project has and binds to the
+     one Dana just added."*
+2. *"Record a £500 payment on the first one."* → **Approval required** card
+   (writes are gated by the server's `readOnlyHint` annotations) → **Approve**.
+3. *"Create a Notion page titled 'Ledgerline overdue — summary' with that
+   list."* → `notion__…` tool call, page link.
+   - Say: *"Two providers, two grants, one user id, zero credentials in
+     Legato."*
+4. If Dana hadn't connected something, the chat shows an inline
+   *"<Provider> needs your authorization"* card instead of a 500.
+
+Note on the UI: shadcn/ui on its default theme (the brief originally said no
+component library; changed on request).
