@@ -21,6 +21,7 @@ See `.env.example`. Nothing secret is committed.
 | `VERCEL_OIDC_TOKEN` | `@vercel/connect`, eve (local dev only) | `vercel env pull` |
 | `CONNECT_NOTION_UID` | app + agent | output of `vercel connect create notion …` (default `notion/legato-notion`) |
 | `VERCEL_TOKEN` | Act 2 `POST /api/connectors` | Vercel account token |
+| `AI_GATEWAY_API_KEY` | eve agent model calls | AI Gateway key from a **live-billing** team — `rthm-unbundled-vtest314` is billing test-mode and AI Gateway rejects OIDC there (`403 AI Gateway is not available on billing test-mode teams`) |
 | `VERCEL_TEAM_ID` | Act 2 | `.vercel/project.json` → `orgId` |
 | `VERCEL_PROJECT_ID` | Act 2 | `.vercel/project.json` → `projectId` |
 
@@ -72,6 +73,7 @@ curl -X POST "https://api.vercel.com/v1/connect/connectors?teamId=$VERCEL_TEAM_I
 vercel env add VERCEL_TEAM_ID    --no-sensitive   # team_G9RQezokwA3rOIpkO5zmu7cZ  (.vercel/project.json → orgId)
 vercel env add VERCEL_PROJECT_ID --no-sensitive   # prj_hS9S3cJzAMc9viQ05cDYpIsFkenN (.vercel/project.json → projectId)
 vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the team with Connect access
+vercel env add AI_GATEWAY_API_KEY --sensitive     # model credential for the agent (see table above)
 vercel env pull                                   # refresh .env.local
 vercel deploy --prod --yes
 
