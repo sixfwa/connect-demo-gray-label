@@ -4,6 +4,7 @@ import {
   createOAuthConnector,
   describeError,
   listProjectConnectors,
+  managementConfig,
 } from "@/lib/vercel-api";
 
 const CreateBody = z.object({
@@ -24,7 +25,21 @@ const CreateBody = z.object({
 });
 
 /** GET /api/connectors — every connector attached to this project. */
-export async function GET() {
+export async function GET(req: Request) {
+  // ?diag=1 — what the runtime actually sees (ids + token fingerprint only).
+  if (new URL(req.url).searchParams.get("diag") === "1") {
+    const cfg = managementConfig();
+    const tok = process.env.VERCEL_TOKEN ?? "";
+    return NextResponse.json({
+      ok: cfg.ok,
+      missing: cfg.ok ? [] : cfg.missing,
+      teamId: process.env.VERCEL_TEAM_ID ?? null,
+      projectId: process.env.VERCEL_PROJECT_ID ?? null,
+      tokenFingerprint: tok ? `${tok.slice(0, 4)}…${tok.slice(-4)} (${tok.length})` : null,
+      vercelEnv: process.env.VERCEL_ENV ?? null,
+      deploymentId: process.env.VERCEL_DEPLOYMENT_ID ?? null,
+    });
+  }
   try {
     const connectors = await listProjectConnectors();
     return NextResponse.json({ connectors });
