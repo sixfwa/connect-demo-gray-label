@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Markdown } from "@/components/markdown";
 
 const SUGGESTIONS = [
   "Create a Notion page titled “Acme deal summary” with three bullet points about a fictional $120k ARR deal closing next quarter.",
@@ -66,7 +67,7 @@ export function AgentChat() {
                 {m.role === "user" ? "Dana" : "Legato agent"}
               </p>
               {m.parts.map((part, i) => (
-                <Part key={partKey(part, i)} part={part} />
+                <Part key={partKey(part, i)} part={part} role={m.role} />
               ))}
             </article>
           ))}
@@ -198,13 +199,21 @@ function partKey(part: EveMessagePart, i: number) {
   return `${part.type}-${i}`;
 }
 
-function Part({ part }: { part: EveMessagePart }) {
+function Part({
+  part,
+  role,
+}: {
+  part: EveMessagePart;
+  role: "user" | "assistant" | string;
+}) {
   switch (part.type) {
     case "text":
-      return (
+      return role === "user" ? (
         <p className="whitespace-pre-wrap text-sm leading-relaxed">
           {part.text}
         </p>
+      ) : (
+        <Markdown text={part.text} />
       );
     case "reasoning":
       return part.text ? (
