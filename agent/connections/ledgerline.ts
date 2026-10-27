@@ -1,34 +1,61 @@
 import { connect } from "@vercel/connect/eve";
-import { defineMcpClientConnection } from "eve/connections";
+import { defineDynamic, defineMcpClientConnection } from "eve/connections";
 import { connectSubject } from "../../lib/demo-user";
+import { LEDGERLINE_ORIGIN } from "../../lib/catalog";
+import { listProjectConnectors } from "../../lib/vercel-api";
 
 /**
- * Ledgerline — the mock "legacy accounting" SaaS (separate project,
- * ledgerline-mock). Its MCP server is OAuth-protected; the connector was
- * created with `vercel connect create https://ledgerline-mock.vercel.app`,
- * which discovered the authorization server and registered a client via DCR.
+ * Ledgerline — the mock "legacy accounting" SaaS — is a *custom* connector
+ * that Legato registers at runtime through its own UI (Act 2). Its Connect
+ * id is therefore not known at build time, so this connection is resolved
+ * when a session starts: list the connectors attached to this project, pick
+ * the one that points at Ledgerline, and expose its MCP server.
  *
- * Writes (create_invoice, record_payment) require `invoices:write`; gate them
- * behind user approval so the demo can show human-in-the-loop on a finance
- * action.
+ * If no Ledgerline connector exists yet, the agent simply has no such
+ * connection — nothing fails until Dana adds one on /connectors.
  */
-const ORIGIN =
-  process.env.LEDGERLINE_ORIGIN ?? "https://ledgerline-mock.vercel.app";
+export default defineDynamic({
+  events: {
+    "session.started": async () => {
+      let connectors: Awaited<ReturnType<typeof listProjectConnectors>>;
+      try {
+        connectors = await listProjectConnectors();
+      } catch (err) {
+        console.warn("[ledgerline] could not list connectors:", err);
+        return null;
+      }
 
-export default defineMcpClientConnection({
-  url: `${ORIGIN}/mcp`,
-  description:
-    "Ledgerline accounting: list/get invoices, vendors, aging report; create invoices and record payments.",
-  auth: connect({
-    connector:
-      process.env.CONNECT_LEDGERLINE_UID ??
-      "ledgerline-mock.vercel.app/ledgerline",
-    principalType: "user",
-    displayName: "Ledgerline",
-    instructions:
-      "Connect Ledgerline from the Legato connectors page to continue.",
-    createSubject: () => connectSubject,
-  }),
-  approval: ({ toolAnnotations }) =>
-    toolAnnotations?.readOnlyHint === true ? "not-applicable" : "user-approval",
+      const host = new URL(LEDGERLINE_ORIGIN).host;
+      const match = connectors
+        .filter((c) => c.type === "oauth")
+        .find(
+          (c) =>
+            (c.clientUrl ?? "").includes(host) ||
+            (c.service ?? "").includes(host) ||
+            c.uid.includes(host) ||
+            /ledgerline/i.test(c.name),
+        );
+      if (!match) return null;
+
+      return defineMcpClientConnection({
+        url: `${LEDGERLINE_ORIGIN}/mcp`,
+        description:
+          "Ledgerline accounting: list/get invoices, vendors, aging report; create invoices and record payments.",
+        instanceKey: match.id,
+        auth: connect({
+          connector: match.id,
+          principalType: "user",
+          displayName: "Ledgerline",
+          instructions:
+            "Connect Ledgerline from the Legato connectors page to continue.",
+          createSubject: () => connectSubject,
+        }),
+        // Writes (create_invoice, record_payment) need a human; reads don't.
+        approval: ({ toolAnnotations }) =>
+          toolAnnotations?.readOnlyHint === true
+            ? "not-applicable"
+            : "user-approval",
+      });
+    },
+  },
 });

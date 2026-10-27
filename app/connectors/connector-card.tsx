@@ -21,6 +21,7 @@ export function ConnectorCard({
   uid,
   status,
   probeUrl,
+  auth,
 }: {
   slug: string;
   name: string;
@@ -28,6 +29,7 @@ export function ConnectorCard({
   uid: string;
   status: ConnectionStatus;
   probeUrl?: string;
+  auth: "oauth" | "api-key";
 }) {
   return (
     <Card>
@@ -39,7 +41,9 @@ export function ConnectorCard({
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-3">
-        <p className="font-mono text-xs text-muted-foreground">{uid}</p>
+        <p className="font-mono text-xs text-muted-foreground">
+          {uid} · {auth === "api-key" ? "API key" : "OAuth"}
+        </p>
         {status.state === "not_attached" && (
           <ErrorNote
             title="Connector not attached to this project"
@@ -69,7 +73,7 @@ export function ConnectorCard({
               size="sm"
               disabled={status.state === "not_attached"}
             >
-              Connect
+              {auth === "api-key" ? "Add API key" : "Connect"}
             </Button>
           )}
         </form>

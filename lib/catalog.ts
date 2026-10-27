@@ -1,9 +1,10 @@
 /**
- * Legato's connector catalog.
+ * Legato's connector catalog — the "out of the box" providers.
  *
- * Act 1: seeded "out of the box" MCP connectors. The Vercel Connect connector
- * behind each entry is created with the CLI (see SETUP.md); the UID is what
- * the app uses to request tokens and to start user authorization.
+ * Both are Vercel Connect *catalog* services: Connect already knows their
+ * endpoints and key formats, so each was created with one CLI/API call (see
+ * SETUP.md). Anything not listed here and attached to the project is a
+ * "custom connector" Legato registered itself (e.g. Ledgerline).
  */
 export type CatalogConnector = {
   slug: string;
@@ -11,9 +12,10 @@ export type CatalogConnector = {
   description: string;
   /** Vercel Connect connector UID, e.g. `notion/legato-notion`. */
   uid: string;
-  /** MCP server URL the eve agent talks to once a token exists. */
-  mcpUrl: string;
-  kind: "mcp";
+  /** How the user authorizes: OAuth consent, or pasting their own API key. */
+  auth: "oauth" | "api-key";
+  /** MCP server URL the eve agent talks to, when the provider has one. */
+  mcpUrl?: string;
   /** Default URL for the Test/probe button (a user-scoped REST endpoint). */
   probeUrl?: string;
 };
@@ -23,24 +25,21 @@ export const LEDGERLINE_ORIGIN =
 
 export const SEEDED_CONNECTORS: CatalogConnector[] = [
   {
-    slug: "ledgerline",
-    name: "Ledgerline",
-    description:
-      "Legacy accounting: invoices, vendors and aging reports. Registered by URL — Connect discovered the OAuth server and registered its own client.",
-    uid:
-      process.env.CONNECT_LEDGERLINE_UID ??
-      "ledgerline-mock.vercel.app/ledgerline",
-    mcpUrl: `${LEDGERLINE_ORIGIN}/mcp`,
-    kind: "mcp",
-    probeUrl: `${LEDGERLINE_ORIGIN}/api/v1/me`,
-  },
-  {
     slug: "notion",
     name: "Notion",
     description: "Pages, databases and comments in your Notion workspace.",
     uid: process.env.CONNECT_NOTION_UID ?? "notion/legato-notion",
+    auth: "oauth",
     mcpUrl: "https://mcp.notion.com/mcp",
-    kind: "mcp",
+  },
+  {
+    slug: "massive",
+    name: "Massive",
+    description:
+      "Market data (stocks, options, forex, crypto) from Massive, formerly Polygon.io. API-key provider: you paste your own key once.",
+    uid: process.env.CONNECT_MASSIVE_UID ?? "massive/legato-massive",
+    auth: "api-key",
+    probeUrl: "https://api.massive.com/v3/reference/tickers?limit=3",
   },
 ];
 

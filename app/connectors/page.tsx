@@ -63,6 +63,7 @@ async function SeededConnectors() {
           uid={connector.uid}
           status={status}
           probeUrl={connector.probeUrl}
+          auth={connector.auth}
         />
       ))}
     </div>

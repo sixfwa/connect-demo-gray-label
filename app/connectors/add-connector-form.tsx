@@ -27,7 +27,7 @@ const GITHUB_PRESET = {
 const LEDGERLINE_ORIGIN =
   process.env.NEXT_PUBLIC_LEDGERLINE_ORIGIN ?? "https://ledgerline-mock.vercel.app";
 const LEDGERLINE_PRESET = {
-  name: "Ledgerline (BYO client)",
+  name: "Ledgerline",
   authorizationEndpoint: `${LEDGERLINE_ORIGIN}/authorize`,
   tokenEndpoint: `${LEDGERLINE_ORIGIN}/token`,
   clientId: "ledgerline-connect-demo",
