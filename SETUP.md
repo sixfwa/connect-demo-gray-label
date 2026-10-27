@@ -20,7 +20,6 @@ See `.env.example`. Nothing secret is committed.
 | --- | --- | --- |
 | `VERCEL_OIDC_TOKEN` | `@vercel/connect`, eve (local dev only) | `vercel env pull` |
 | `CONNECT_NOTION_UID` | app + agent | output of `vercel connect create notion …` (default `notion/legato-notion`) |
-| `CONNECT_LINEAR_UID` | app | output of `vercel connect create linear …` (default `linear/legato-linear`) |
 | `VERCEL_TOKEN` | Act 2 `POST /api/connectors` | Vercel account token |
 | `VERCEL_TEAM_ID` | Act 2 | `.vercel/project.json` → `orgId` |
 | `VERCEL_PROJECT_ID` | Act 2 | `.vercel/project.json` → `projectId` |
@@ -51,13 +50,6 @@ vercel connect attach notion/legato-notion --yes
 #    Verify:
 vercel connect list
 
-#    Linear (optional — not created in the recorded run; the UI shows it as "Not attached"
-#    until you do this, which is itself a demo of the failure mode):
-vercel connect create linear --help
-vercel connect create linear --connection-method mcp --name legato-linear --yes
-vercel connect attach linear/legato-linear --yes
-#    then add agent/connections/linear.ts (copy notion.ts, change url to https://mcp.linear.app/mcp
-#    and connector to linear/legato-linear) and redeploy.
 
 # 2b. Ledgerline — the mock third-party used in Acts 2 and 3 (separate project: ../ledgerline-mock,
 #     deployed at https://ledgerline-mock.vercel.app). Register it by URL: Connect reads the

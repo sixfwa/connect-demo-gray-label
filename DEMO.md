@@ -25,13 +25,12 @@ connector is a team-level object; `attach` is what lets this project mint
 tokens from it."*
 
 1. Open `/connectors`.
-   - Point at: Legato branding only. Notion shows **Not connected**. Linear
-     shows **Not attached** with the raw Connect error
-     (`not_found: Connector not found: linear/legato-linear`).
+   - Point at: Legato branding only. Notion and Ledgerline show **Not
+     connected**.
    - Say: *"The status isn't stored in Legato — the page asks Connect for a
-     token for Dana on each load. Connect is the system of record. The Linear
-     card is what a misconfigured connector looks like: the error is shown,
-     not swallowed."*
+     token for Dana on each load. Connect is the system of record. If a
+     connector were missing or not attached, the card would show the raw
+     Connect error and the fix command — nothing is swallowed."*
 2. Click **Connect** on Notion.
    - Point at: the hop to `connect.vercel.com/authorize/…`, then Notion's own
      consent screen, then back to **Legato's** `/connectors/callback`.

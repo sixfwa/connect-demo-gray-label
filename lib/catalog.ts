@@ -42,14 +42,6 @@ export const SEEDED_CONNECTORS: CatalogConnector[] = [
     mcpUrl: "https://mcp.notion.com/mcp",
     kind: "mcp",
   },
-  {
-    slug: "linear",
-    name: "Linear",
-    description: "Issues, projects and cycles in your Linear workspace.",
-    uid: process.env.CONNECT_LINEAR_UID ?? "linear/legato-linear",
-    mcpUrl: "https://mcp.linear.app/mcp",
-    kind: "mcp",
-  },
 ];
 
 export function findSeeded(slug: string): CatalogConnector | undefined {
