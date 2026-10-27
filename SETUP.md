@@ -10,7 +10,7 @@ never required.
 | Node.js 24+ | eve requires it |
 | pnpm | package manager |
 | Vercel CLI **≥ 65** (`pnpm add -g vercel@latest`) | `vercel connect discover`, `--connection-method`, `--yes` do not exist in older CLIs (54.x was missing all of them) |
-| A Vercel team | this demo was built on `rthm-vtest314` |
+| A Vercel team | this demo runs on `rthm-unbundled-vtest314` (the Ledgerline mock stays on `rthm-vtest314`; it is public, so the team does not matter) |
 
 ## Environment variables
 
@@ -35,7 +35,7 @@ vercel --version          # must be >= 65
 # 1. Project
 cd legato-connect-demo
 pnpm install
-vercel link --scope rthm-vtest314 --project legato-connect-demo --yes
+vercel link --scope rthm-unbundled-vtest314 --project legato-connect-demo --yes
 #   → creates the project if missing, writes .vercel/project.json and .env.local (VERCEL_OIDC_TOKEN)
 
 # 2. Act 1 — out-of-the-box MCP connectors
@@ -63,7 +63,7 @@ vercel connect attach linear/legato-linear --yes
 #     deployed at https://ledgerline-mock.vercel.app). Register it by URL: Connect reads the
 #     discovery document and performs dynamic client registration. No browser, no secrets.
 vercel connect create https://ledgerline-mock.vercel.app --name ledgerline --yes
-#   → scl_GmLZ2Kqpecu77pOjFnM0Hg, UID ledgerline-mock.vercel.app/ledgerline (note: <host>/<name>, not oauth/<name>)
+#   → scl_r0FFQRc2kfofdVEhHYOA, UID ledgerline-mock.vercel.app/ledgerline (note: <host>/<name>, not oauth/<name>)
 vercel connect attach ledgerline-mock.vercel.app/ledgerline --yes
 #     The app defaults to that UID and origin; override with CONNECT_LEDGERLINE_UID / LEDGERLINE_ORIGIN
 #     (+ NEXT_PUBLIC_LEDGERLINE_ORIGIN for the form preset) if you deploy Ledgerline elsewhere.
@@ -71,8 +71,8 @@ vercel connect attach ledgerline-mock.vercel.app/ledgerline --yes
 # 3. Act 2 — bring-your-own OAuth connectors through the REST API
 #    Management calls (create/list/delete connectors) need a team access token.
 #    Token minting still uses the deployment's OIDC token, like Act 1.
-vercel env add VERCEL_TEAM_ID    --no-sensitive   # team_YY1Z6a3GnL8sGi39oXfbyIJu  (.vercel/project.json → orgId)
-vercel env add VERCEL_PROJECT_ID --no-sensitive   # prj_V8qrhc7HeJr77deDwgGJzxGVOkZ1 (.vercel/project.json → projectId)
+vercel env add VERCEL_TEAM_ID    --no-sensitive   # team_G9RQezokwA3rOIpkO5zmu7cZ  (.vercel/project.json → orgId)
+vercel env add VERCEL_PROJECT_ID --no-sensitive   # prj_hS9S3cJzAMc9viQ05cDYpIsFkenN (.vercel/project.json → projectId)
 vercel env add VERCEL_TOKEN      --sensitive      # paste a token scoped to the team with Connect access
 vercel env pull                                   # refresh .env.local
 vercel deploy --prod --yes
