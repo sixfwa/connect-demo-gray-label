@@ -15,8 +15,16 @@ Cast:
 | **Massive** (ex-Polygon, market data) | Out-of-the-box API-key provider | one REST call, `type: api-key`, per-user keys |
 | **Ledgerline** (mock legacy accounting SaaS we run) | The custom provider Legato adds live | from Legato's own UI, during the demo |
 
-Reset before the demo: on `/connectors`, **Remove** any Ledgerline card under
-*Custom connectors* so you can add it live.
+Before the demo:
+
+- On `/connectors`, **Remove** any Ledgerline card under *Custom connectors*
+  so you can add it live in Act 2.
+- Have a real **Massive API key** to hand (free account at massive.com) for
+  Act 1 step 3.
+- Act 3's Ledgerline prompts need the Act 2 connection completed in the same
+  session — don't skip ahead.
+- URLs: app `https://legato-connect-demo.vercel.app`, mock provider
+  `https://ledgerline-mock.vercel.app`.
 
 ---
 
