@@ -12,7 +12,7 @@ import {
   LoaderIcon,
   XIcon,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,8 +34,9 @@ import { Separator } from "@/components/ui/separator";
 import { Markdown } from "@/components/markdown";
 
 const SUGGESTIONS = [
-  "Create a Notion page titled “Acme deal summary” with three bullet points about a fictional $120k ARR deal closing next quarter.",
-  "Search my Notion workspace for pages mentioning “Acme” and summarise them.",
+  "List Ledgerline invoices that are overdue and tell me the total.",
+  "Using Massive, what was AAPL's previous close, and are the US markets open right now?",
+  "Create a Notion page titled “Ledgerline overdue — summary” with the overdue invoices as bullet points.",
 ];
 
 export function AgentChat() {
@@ -44,6 +45,25 @@ export function AgentChat() {
   const busy = agent.status === "submitted" || agent.status === "streaming";
   const resuming = agent.status === "resuming";
   const pending = openConversationInputs(agent.data).map((i) => i.request);
+
+  // Keep the newest content in view while the agent streams, unless the user
+  // has scrolled up to read something earlier.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const stickToBottom = useRef(true);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      stickToBottom.current =
+        el.scrollHeight - el.scrollTop - el.clientHeight < 48;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el && stickToBottom.current) el.scrollTop = el.scrollHeight;
+  }, [agent.data.messages, pending.length, agent.status]);
 
   const submit = (text: string) => {
     const message = text.trim();
@@ -54,8 +74,11 @@ export function AgentChat() {
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
-      <Card className="flex min-h-[560px] flex-col py-0">
-        <CardContent className="flex-1 space-y-5 overflow-y-auto p-6">
+      <Card className="flex h-[calc(100vh-14rem)] min-h-[480px] flex-col overflow-hidden py-0">
+        <CardContent
+          ref={scrollRef}
+          className="min-h-0 flex-1 space-y-5 overflow-y-auto p-6"
+        >
           {agent.data.messages.length === 0 && (
             <p className="text-sm text-muted-foreground">
               No messages yet. Try one of the suggestions, or type a task.
