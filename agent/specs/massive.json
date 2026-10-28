@@ -1,0 +1,2645 @@
+{
+ "openapi": "3.0.3",
+ "info": {
+  "title": "Massive API (trimmed for Legato demo)",
+  "version": "1.0.0",
+  "description": "Read-only subset of https://api.massive.com/openapi. Regenerate with scripts/trim-massive-spec.py"
+ },
+ "servers": [
+  {
+   "url": "https://api.massive.com"
+  }
+ ],
+ "paths": {
+  "/v1/marketstatus/now": {
+   "get": {
+    "description": "Get the current trading status of the exchanges and overall financial markets.",
+    "operationId": "GetMarketStatus",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "afterHours": true,
+         "currencies": {
+          "crypto": "open",
+          "fx": "open"
+         },
+         "earlyHours": false,
+         "exchanges": {
+          "nasdaq": "extended-hours",
+          "nyse": "extended-hours",
+          "otc": "closed"
+         },
+         "market": "extended-hours",
+         "serverTime": "2020-11-10T17:37:37-05:00"
+        },
+        "schema": {
+         "properties": {
+          "afterHours": {
+           "description": "Whether or not the market is in post-market hours.",
+           "type": "boolean",
+           "x-polygon-go-type": {
+            "name": "*bool"
+           }
+          },
+          "currencies": {
+           "description": "Contains the status of various currency markets.",
+           "properties": {
+            "crypto": {
+             "description": "The status of the crypto market.",
+             "type": "string"
+            },
+            "fx": {
+             "description": "The status of the forex market.",
+             "type": "string"
+            }
+           },
+           "type": "object",
+           "x-polygon-go-type": {
+            "name": "Currencies"
+           }
+          },
+          "earlyHours": {
+           "description": "Whether or not the market is in pre-market hours.",
+           "type": "boolean",
+           "x-polygon-go-type": {
+            "name": "*bool"
+           }
+          },
+          "exchanges": {
+           "description": "Contains the status of different US stock exchanges (e.g., Nasdaq, NYSE).",
+           "properties": {
+            "nasdaq": {
+             "description": "The status of the Nasdaq market.",
+             "type": "string"
+            },
+            "nyse": {
+             "description": "The status of the NYSE market.",
+             "type": "string"
+            },
+            "otc": {
+             "description": "The status of the OTC market.",
+             "type": "string"
+            }
+           },
+           "type": "object",
+           "x-polygon-go-type": {
+            "name": "Exchanges"
+           }
+          },
+          "indicesGroups": {
+           "description": "Contains the status of various index groups (e.g., MSCI, FTSE Russell).",
+           "properties": {
+            "cccy": {
+             "description": "The status of Cboe Streaming Market Indices Cryptocurrency (\"CCCY\") indices trading hours.",
+             "type": "string"
+            },
+            "cgi": {
+             "description": "The status of Cboe Global Indices (\"CGI\") trading hours.",
+             "type": "string"
+            },
+            "dow_jones": {
+             "description": "The status of Dow Jones indices trading hours",
+             "type": "string"
+            },
+            "ftse_russell": {
+             "description": "The status of Financial Times Stock Exchange Group (\"FTSE\") Russell indices trading hours.",
+             "type": "string"
+            },
+            "msci": {
+             "description": "The status of Morgan Stanley Capital International (\"MSCI\") indices trading hours.",
+             "type": "string"
+            },
+            "mstar": {
+             "description": "The status of Morningstar (\"MSTAR\") indices trading hours.",
+             "type": "string"
+            },
+            "mstarc": {
+             "description": "The status of Morningstar Customer (\"MSTARC\") indices trading hours.",
+             "type": "string"
+            },
+            "nasdaq": {
+             "description": "The status of National Association of Securities Dealers Automated Quotations (\"Nasdaq\") indices trading hours.",
+             "type": "string"
+            },
+            "s_and_p": {
+             "description": "The status of Standard & Poor's (\"S&P\") indices trading hours.",
+             "type": "string"
+            },
+            "societe_generale": {
+             "description": "The status of Societe Generale indices trading hours.",
+             "type": "string"
+            }
+           },
+           "type": "object",
+           "x-polygon-go-type": {
+            "name": "IndicesGroups"
+           }
+          },
+          "market": {
+           "description": "The status of the market as a whole.",
+           "type": "string"
+          },
+          "serverTime": {
+           "description": "The current time of the server, returned as a date-time in RFC3339 format.",
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       }
+      },
+      "description": "OK"
+     }
+    },
+    "summary": "Market Status",
+    "tags": [
+     "reference:stocks:market"
+    ]
+   }
+  },
+  "/v1/marketstatus/upcoming": {
+   "get": {
+    "description": "Get upcoming market holidays and their open/close times.",
+    "operationId": "GetMarketHolidays",
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": [
+         {
+          "date": "2020-11-26",
+          "exchange": "NYSE",
+          "name": "Thanksgiving",
+          "status": "closed"
+         },
+         {
+          "date": "2020-11-26",
+          "exchange": "NASDAQ",
+          "name": "Thanksgiving",
+          "status": "closed"
+         },
+         {
+          "date": "2020-11-26",
+          "exchange": "OTC",
+          "name": "Thanksgiving",
+          "status": "closed"
+         },
+         {
+          "close": "2020-11-27T18:00:00.000Z",
+          "date": "2020-11-27",
+          "exchange": "NASDAQ",
+          "name": "Thanksgiving",
+          "open": "2020-11-27T14:30:00.000Z",
+          "status": "early-close"
+         },
+         {
+          "close": "2020-11-27T18:00:00.000Z",
+          "date": "2020-11-27",
+          "exchange": "NYSE",
+          "name": "Thanksgiving",
+          "open": "2020-11-27T14:30:00.000Z",
+          "status": "early-close"
+         }
+        ],
+        "schema": {
+         "items": {
+          "properties": {
+           "close": {
+            "description": "The market close time on the holiday (if it's not closed).",
+            "type": "string"
+           },
+           "date": {
+            "description": "The date of the holiday.",
+            "type": "string"
+           },
+           "exchange": {
+            "description": "Which market the record is for.",
+            "type": "string"
+           },
+           "name": {
+            "description": "The name of the holiday.",
+            "type": "string"
+           },
+           "open": {
+            "description": "The market open time on the holiday (if it's not closed).",
+            "type": "string"
+           },
+           "status": {
+            "description": "The status of the market on the holiday.",
+            "type": "string"
+           }
+          },
+          "type": "object",
+          "x-polygon-go-type": {
+           "name": "MarketHoliday"
+          }
+         },
+         "type": "array"
+        }
+       }
+      },
+      "description": "OK"
+     }
+    },
+    "summary": "Market Holidays",
+    "tags": [
+     "reference:stocks:market"
+    ]
+   }
+  },
+  "/v1/open-close/{stocksTicker}/{date}": {
+   "get": {
+    "description": "Get the open, close and afterhours prices of a stock symbol on a certain date.\n",
+    "operationId": "GetStocksOpenClose",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "example": "AAPL",
+      "in": "path",
+      "name": "stocksTicker",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "The date of the requested open/close in the format YYYY-MM-DD.",
+      "example": "2023-01-09",
+      "in": "path",
+      "name": "date",
+      "required": true,
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Whether or not the results are adjusted for splits.  By default, results are adjusted.\nSet this to false to get results that are NOT adjusted for splits.\n",
+      "example": true,
+      "in": "query",
+      "name": "adjusted",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "afterHours": 322.1,
+         "close": 325.12,
+         "from": "2023-01-09",
+         "high": 326.2,
+         "low": 322.3,
+         "open": 324.66,
+         "preMarket": 324.5,
+         "status": "OK",
+         "symbol": "AAPL",
+         "volume": 26122646
+        },
+        "schema": {
+         "properties": {
+          "afterHours": {
+           "description": "The close price of the ticker symbol in after hours trading.",
+           "format": "double",
+           "type": "number"
+          },
+          "close": {
+           "description": "The close price for the symbol in the given time period.",
+           "format": "double",
+           "type": "number"
+          },
+          "from": {
+           "description": "The requested date.",
+           "format": "date",
+           "type": "string"
+          },
+          "high": {
+           "description": "The highest price for the symbol in the given time period.",
+           "format": "double",
+           "type": "number"
+          },
+          "low": {
+           "description": "The lowest price for the symbol in the given time period.",
+           "format": "double",
+           "type": "number"
+          },
+          "open": {
+           "description": "The open price for the symbol in the given time period.",
+           "format": "double",
+           "type": "number"
+          },
+          "otc": {
+           "description": "Whether or not this aggregate is for an OTC ticker. This field will be left off if false.",
+           "type": "boolean"
+          },
+          "preMarket": {
+           "description": "The open price of the ticker symbol in pre-market trading.",
+           "format": "double",
+           "type": "number"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "type": "string"
+          },
+          "symbol": {
+           "description": "The exchange symbol that this item is traded under.",
+           "type": "string"
+          },
+          "volume": {
+           "description": "The trading volume of the symbol in the given time period.",
+           "format": "double",
+           "type": "number"
+          }
+         },
+         "required": [
+          "status",
+          "from",
+          "symbol",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+         ],
+         "type": "object"
+        }
+       },
+       "text/csv": {
+        "example": "from,open,high,low,close,volume,afterHours,preMarket\n2023-01-09,324.66,326.2,322.3,325.12,26122646,322.1,324.5\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "The open/close of this stock symbol."
+     },
+     "default": {
+      "description": "Unexpected error"
+     }
+    },
+    "summary": "Daily Open/Close",
+    "tags": [
+     "stocks:open-close"
+    ]
+   }
+  },
+  "/v2/aggs/ticker/{stocksTicker}/prev": {
+   "get": {
+    "description": "Get the previous day's open, high, low, and close (OHLC) for the specified stock ticker.\n",
+    "operationId": "GetPreviousStocksAggregates",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "example": "AAPL",
+      "in": "path",
+      "name": "stocksTicker",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Whether or not the results are adjusted for splits.  By default, results are adjusted.\nSet this to false to get results that are NOT adjusted for splits.\n",
+      "example": true,
+      "in": "query",
+      "name": "adjusted",
+      "schema": {
+       "type": "boolean"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "adjusted": true,
+         "queryCount": 1,
+         "request_id": "6a7e466379af0a71039d60cc78e72282",
+         "results": [
+          {
+           "T": "AAPL",
+           "c": 115.97,
+           "h": 117.59,
+           "l": 114.13,
+           "o": 115.55,
+           "t": 1605042000000,
+           "v": 131704427,
+           "vw": 116.3058
+          }
+         ],
+         "resultsCount": 1,
+         "status": "OK",
+         "ticker": "AAPL"
+        },
+        "schema": {
+         "allOf": [
+          {
+           "properties": {
+            "ticker": {
+             "description": "The exchange symbol that this item is traded under.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "ticker"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "adjusted": {
+             "description": "Whether or not this response was adjusted for splits.",
+             "type": "boolean"
+            },
+            "queryCount": {
+             "description": "The number of aggregates (minute or day) used to generate the response.",
+             "type": "integer"
+            },
+            "request_id": {
+             "description": "A request id assigned by the server.",
+             "type": "string"
+            },
+            "resultsCount": {
+             "description": "The total number of results for this request.",
+             "type": "integer"
+            },
+            "status": {
+             "description": "The status of this request's response.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "status",
+            "adjusted",
+            "queryCount",
+            "resultsCount",
+            "request_id"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "results": {
+             "description": "An array of results containing the requested data.",
+             "items": {
+              "properties": {
+               "T": {
+                "description": "The exchange symbol that this item is traded under.",
+                "type": "string"
+               },
+               "c": {
+                "description": "The close price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "h": {
+                "description": "The highest price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "l": {
+                "description": "The lowest price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "n": {
+                "description": "The number of transactions in the aggregate window.",
+                "type": "integer"
+               },
+               "o": {
+                "description": "The open price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "t": {
+                "description": "The Unix millisecond timestamp for the start of the aggregate window.",
+                "type": "integer"
+               },
+               "v": {
+                "description": "The trading volume of the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "vw": {
+                "description": "The volume weighted average price.",
+                "format": "double",
+                "type": "number"
+               }
+              },
+              "required": [
+               "T",
+               "o",
+               "h",
+               "l",
+               "c",
+               "v",
+               "t"
+              ],
+              "type": "object"
+             },
+             "type": "array"
+            }
+           },
+           "type": "object"
+          }
+         ]
+        }
+       },
+       "text/csv": {
+        "example": "T,c,h,l,o,t,v,vw\nAAPL,115.97,117.59,114.13,115.55,1605042000000,131704427.0,116.3058\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "The previous day OHLC for the ticker."
+     },
+     "default": {
+      "description": "Unexpected error"
+     }
+    },
+    "summary": "Previous Close",
+    "tags": [
+     "stocks:aggregates"
+    ]
+   }
+  },
+  "/v2/aggs/ticker/{stocksTicker}/range/{multiplier}/{timespan}/{from}/{to}": {
+   "get": {
+    "description": "Get aggregate bars for a stock over a given date range in custom time window sizes.\n<br />\n<br />\nFor example, if timespan = \u2018minute\u2019 and multiplier = \u20185\u2019 then 5-minute bars will be returned.\n",
+    "operationId": "GetStocksAggregates",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "example": "AAPL",
+      "in": "path",
+      "name": "stocksTicker",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "The size of the timespan multiplier.",
+      "example": 1,
+      "in": "path",
+      "name": "multiplier",
+      "required": true,
+      "schema": {
+       "type": "integer"
+      }
+     },
+     {
+      "description": "The size of the time window.",
+      "example": "day",
+      "in": "path",
+      "name": "timespan",
+      "required": true,
+      "schema": {
+       "enum": [
+        "second",
+        "minute",
+        "hour",
+        "day",
+        "week",
+        "month",
+        "quarter",
+        "year"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "The start of the aggregate time window. Either a date with the format YYYY-MM-DD or a millisecond timestamp.",
+      "example": "2025-11-03",
+      "in": "path",
+      "name": "from",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "The end of the aggregate time window. Either a date with the format YYYY-MM-DD or a millisecond timestamp.",
+      "example": "2025-11-28",
+      "in": "path",
+      "name": "to",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Whether or not the results are adjusted for splits.  By default, results are adjusted.\nSet this to false to get results that are NOT adjusted for splits.\n",
+      "example": true,
+      "in": "query",
+      "name": "adjusted",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "description": "Sort the results by timestamp.\n`asc` will return results in ascending order (oldest at the top),\n`desc` will return results in descending order (newest at the top).\n",
+      "example": "asc",
+      "in": "query",
+      "name": "sort",
+      "schema": {
+       "enum": [
+        "asc",
+        "desc"
+       ]
+      }
+     },
+     {
+      "description": "Limits the number of base aggregates queried to create the aggregate results. Max 50000 and Default 5000.\nRead more about how limit is used to calculate aggregate results in our article on\n<a href=\"https://massive.com/blog/aggs-api-updates/\" target=\"_blank\" alt=\"Aggregate Data API Improvements\">Aggregate Data API Improvements</a>.\n",
+      "example": 120,
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "type": "integer"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "adjusted": true,
+         "next_url": "https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/1578114000000/2020-01-10?cursor=bGltaXQ9MiZzb3J0PWFzYw",
+         "queryCount": 2,
+         "request_id": "6a7e466379af0a71039d60cc78e72282",
+         "results": [
+          {
+           "c": 75.0875,
+           "h": 75.15,
+           "l": 73.7975,
+           "n": 1,
+           "o": 74.06,
+           "t": 1577941200000,
+           "v": 135647456,
+           "vw": 74.6099
+          },
+          {
+           "c": 74.3575,
+           "h": 75.145,
+           "l": 74.125,
+           "n": 1,
+           "o": 74.2875,
+           "t": 1578027600000,
+           "v": 146535512,
+           "vw": 74.7026
+          }
+         ],
+         "resultsCount": 2,
+         "status": "OK",
+         "ticker": "AAPL"
+        },
+        "schema": {
+         "allOf": [
+          {
+           "properties": {
+            "ticker": {
+             "description": "The exchange symbol that this item is traded under.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "ticker"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "adjusted": {
+             "description": "Whether or not this response was adjusted for splits.",
+             "type": "boolean"
+            },
+            "queryCount": {
+             "description": "The number of aggregates (minute or day) used to generate the response.",
+             "type": "integer"
+            },
+            "request_id": {
+             "description": "A request id assigned by the server.",
+             "type": "string"
+            },
+            "resultsCount": {
+             "description": "The total number of results for this request.",
+             "type": "integer"
+            },
+            "status": {
+             "description": "The status of this request's response.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "status",
+            "adjusted",
+            "queryCount",
+            "resultsCount",
+            "request_id"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "results": {
+             "description": "An array of results containing the requested data.",
+             "items": {
+              "properties": {
+               "c": {
+                "description": "The close price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "h": {
+                "description": "The highest price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "l": {
+                "description": "The lowest price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "n": {
+                "description": "The number of transactions in the aggregate window.",
+                "type": "integer"
+               },
+               "o": {
+                "description": "The open price for the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "otc": {
+                "description": "Whether or not this aggregate is for an OTC ticker. This field will be left off if false.",
+                "type": "boolean"
+               },
+               "t": {
+                "description": "The Unix millisecond timestamp for the start of the aggregate window.",
+                "type": "integer"
+               },
+               "v": {
+                "description": "The trading volume of the symbol in the given time period.",
+                "format": "double",
+                "type": "number"
+               },
+               "vw": {
+                "description": "The volume weighted average price.",
+                "format": "double",
+                "type": "number"
+               }
+              },
+              "required": [
+               "o",
+               "h",
+               "l",
+               "c",
+               "v",
+               "t"
+              ],
+              "type": "object"
+             },
+             "type": "array"
+            }
+           },
+           "type": "object"
+          },
+          {
+           "properties": {
+            "next_url": {
+             "description": "If present, this value can be used to fetch the next page of data.",
+             "type": "string"
+            }
+           },
+           "type": "object"
+          }
+         ]
+        }
+       },
+       "text/csv": {
+        "example": "c,h,l,n,o,t,v,vw\n75.0875,75.15,73.7975,1,74.06,1577941200000,135647456.0,74.6099\n74.3575,75.145,74.125,1,74.2875,1578027600000,146535512.0,74.7026\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Stock Aggregates."
+     },
+     "default": {
+      "description": "Unexpected error"
+     }
+    },
+    "summary": "Aggregates (Bars)",
+    "tags": [
+     "stocks:aggregates"
+    ]
+   }
+  },
+  "/v2/snapshot/locale/us/markets/stocks/tickers/{stocksTicker}": {
+   "get": {
+    "description": "Get the most up-to-date market data for a single traded stock ticker.\n<br />\n<br />\nNote: Snapshot data is cleared at 3:30am EST and gets populated as data is received from the exchanges. This can happen as early as 4am EST.\n",
+    "operationId": "GetStocksSnapshotTicker",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "example": "AAPL",
+      "in": "path",
+      "name": "stocksTicker",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "request_id": "657e430f1ae768891f018e08e03598d8",
+         "status": "OK",
+         "ticker": {
+          "day": {
+           "c": 120.4229,
+           "dv": "28727868.0",
+           "h": 120.53,
+           "l": 118.81,
+           "o": 119.62,
+           "v": 28727868,
+           "vw": 119.725
+          },
+          "lastQuote": {
+           "P": 120.47,
+           "S": 4,
+           "p": 120.46,
+           "s": 8,
+           "t": 1605195918507251700
+          },
+          "lastTrade": {
+           "c": [
+            14,
+            41
+           ],
+           "ds": "236.0",
+           "i": "4046",
+           "p": 120.47,
+           "s": 236,
+           "t": 1605195918306274000,
+           "x": 10
+          },
+          "min": {
+           "av": 28724441,
+           "c": 120.4201,
+           "dav": "28724441.0",
+           "dv": "270796.0",
+           "h": 120.468,
+           "l": 120.37,
+           "n": 762,
+           "o": 120.435,
+           "t": 1684428720000,
+           "v": 270796,
+           "vw": 120.4129
+          },
+          "prevDay": {
+           "c": 119.49,
+           "h": 119.63,
+           "l": 116.44,
+           "o": 117.19,
+           "v": 110597265,
+           "vw": 118.4998
+          },
+          "ticker": "AAPL",
+          "todaysChange": 0.98,
+          "todaysChangePerc": 0.82,
+          "updated": 1605195918306274000
+         }
+        },
+        "schema": {
+         "allOf": [
+          {
+           "properties": {
+            "status": {
+             "description": "The status of this request's response.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "status"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "request_id": {
+             "description": "A request id assigned by the server.",
+             "type": "string"
+            }
+           },
+           "required": [
+            "request_id"
+           ],
+           "type": "object"
+          },
+          {
+           "properties": {
+            "ticker": {
+             "description": "Contains the requested snapshot data for the specified ticker.",
+             "properties": {
+              "day": {
+               "description": "The most recent daily bar for this ticker.",
+               "properties": {
+                "c": {
+                 "description": "The close price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "dv": {
+                 "description": "The volume including fractional shares, respresented as a string.",
+                 "type": "string"
+                },
+                "h": {
+                 "description": "The highest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "l": {
+                 "description": "The lowest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "o": {
+                 "description": "The open price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "otc": {
+                 "description": "Whether or not this aggregate is for an OTC ticker. This field will be left off if false.",
+                 "type": "boolean"
+                },
+                "v": {
+                 "description": "The trading volume of the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "vw": {
+                 "description": "The volume weighted average price.",
+                 "format": "double",
+                 "type": "number"
+                }
+               },
+               "required": [
+                "o",
+                "h",
+                "l",
+                "c",
+                "v",
+                "vw"
+               ],
+               "type": "object"
+              },
+              "fmv": {
+               "description": "Fair market value is only available on Business plans. It is our proprietary algorithm to generate a real-time, accurate, fair market value of a tradable security. For more information, <a rel=\"nofollow\" target=\"_blank\" href=\"https://massive.com/contact\">contact us</a>.",
+               "format": "double",
+               "type": "number"
+              },
+              "lastQuote": {
+               "description": "The most recent quote for this ticker.  This is only returned if your current plan includes quotes.",
+               "properties": {
+                "P": {
+                 "description": "The ask price.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "S": {
+                 "description": "The ask size in lots.",
+                 "type": "integer"
+                },
+                "p": {
+                 "description": "The bid price.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "s": {
+                 "description": "The bid size in lots.",
+                 "type": "integer"
+                },
+                "t": {
+                 "description": "The nanosecond accuracy SIP Unix Timestamp. This is the timestamp of when the SIP received this message from the exchange which produced it.",
+                 "type": "integer"
+                }
+               },
+               "required": [
+                "p",
+                "s",
+                "P",
+                "S",
+                "t"
+               ],
+               "type": "object"
+              },
+              "lastTrade": {
+               "description": "The most recent trade for this ticker.  This is only returned if your current plan includes trades.",
+               "properties": {
+                "c": {
+                 "description": "A list of condition codes. See [Stocks Condition Codes](https://massive.com/docs/rest/stocks/market-operations/condition-codes) for what each code means.",
+                 "items": {
+                  "description": "The condition code.",
+                  "type": "integer"
+                 },
+                 "type": "array"
+                },
+                "ds": {
+                 "description": "The size of the trade including fractional shares, respresented as a string.",
+                 "type": "string"
+                },
+                "i": {
+                 "description": "The Trade ID which uniquely identifies a trade. These are unique per\ncombination of ticker, exchange, and TRF. For example: A trade for AAPL\nexecuted on NYSE and a trade for AAPL executed on NASDAQ could potentially\nhave the same Trade ID.\n",
+                 "type": "string"
+                },
+                "p": {
+                 "description": "The price of the trade. This is the actual dollar value per whole share of\nthis trade. A trade of 100 shares with a price of $2.00 would be worth a\ntotal dollar value of $200.00.\n",
+                 "format": "double",
+                 "type": "number"
+                },
+                "s": {
+                 "description": "The size (volume) of the trade.",
+                 "type": "integer"
+                },
+                "t": {
+                 "description": "The nanosecond accuracy SIP Unix Timestamp. This is the timestamp of when the SIP received this message from the exchange which produced it.",
+                 "type": "integer"
+                },
+                "x": {
+                 "description": "The exchange ID. See <a href=\"https://massive.com/docs/rest/stocks/market-operations/exchanges\" alt=\"Exchanges\">Exchanges</a> for Massive's mapping of exchange IDs.",
+                 "type": "integer"
+                }
+               },
+               "required": [
+                "c",
+                "i",
+                "p",
+                "s",
+                "t",
+                "x",
+                "ds"
+               ],
+               "type": "object"
+              },
+              "min": {
+               "description": "The most recent minute bar for this ticker.",
+               "properties": {
+                "av": {
+                 "description": "The accumulated volume.",
+                 "type": "integer"
+                },
+                "c": {
+                 "description": "The close price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "dav": {
+                 "description": "The accumulated volume including fractional shares, respresented as a string.",
+                 "type": "string"
+                },
+                "dv": {
+                 "description": "The volume including fractional shares, respresented as a string.",
+                 "type": "string"
+                },
+                "h": {
+                 "description": "The highest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "l": {
+                 "description": "The lowest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "n": {
+                 "description": "The number of transactions in the aggregate window.",
+                 "type": "integer"
+                },
+                "o": {
+                 "description": "The open price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "otc": {
+                 "description": "Whether or not this aggregate is for an OTC ticker. This field will be left off if false.",
+                 "type": "boolean"
+                },
+                "t": {
+                 "description": "The Unix millisecond timestamp for the start of the aggregate window.",
+                 "type": "integer"
+                },
+                "v": {
+                 "description": "The trading volume of the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "vw": {
+                 "description": "The volume weighted average price.",
+                 "format": "double",
+                 "type": "number"
+                }
+               },
+               "required": [
+                "av",
+                "dav",
+                "o",
+                "h",
+                "l",
+                "c",
+                "v",
+                "vw",
+                "t",
+                "n"
+               ],
+               "type": "object"
+              },
+              "prevDay": {
+               "description": "The previous day's bar for this ticker.",
+               "properties": {
+                "c": {
+                 "description": "The close price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "h": {
+                 "description": "The highest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "l": {
+                 "description": "The lowest price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "o": {
+                 "description": "The open price for the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "otc": {
+                 "description": "Whether or not this aggregate is for an OTC ticker. This field will be left off if false.",
+                 "type": "boolean"
+                },
+                "v": {
+                 "description": "The trading volume of the symbol in the given time period.",
+                 "format": "double",
+                 "type": "number"
+                },
+                "vw": {
+                 "description": "The volume weighted average price.",
+                 "format": "double",
+                 "type": "number"
+                }
+               },
+               "required": [
+                "o",
+                "h",
+                "l",
+                "c",
+                "v",
+                "vw"
+               ],
+               "type": "object"
+              },
+              "ticker": {
+               "description": "The exchange symbol that this item is traded under.",
+               "type": "string"
+              },
+              "todaysChange": {
+               "description": "The value of the change from the previous day.",
+               "format": "double",
+               "type": "number"
+              },
+              "todaysChangePerc": {
+               "description": "The percentage change since the previous day.",
+               "format": "double",
+               "type": "number"
+              },
+              "updated": {
+               "description": "The last updated timestamp.",
+               "type": "integer"
+              }
+             },
+             "type": "object"
+            }
+           },
+           "type": "object"
+          }
+         ]
+        }
+       },
+       "text/csv": {
+        "example": "day_o,day_h,day_l,day_c,day_v,day_vw,day_dv,quoteResponse_P,quoteResponse_S,quoteResponse_p,quoteResponse_s,quoteResponse_t,lastTrade_c,lastTrade_i,lastTrade_p,lastTrade_s,lastTrade_t,lastTrade_x,lastTrade_ds,min_o,min_h,min_l,min_c,min_v,min_vw,min_av,min_t,min_n,min_dv,min_dav,prevDay_o,prevDay_h,prevDay_l,prevDay_c,prevDay_v,prevDay_vw\n119.62,120.53,118.81,120.4229,28727868,119.725,\"28727868.0\",120.47,4,120.46,8,1605195918507251817,\"[14,41]\",4046,120.47,236,1605195918306274031,10,\"236.0\",120.435,120.468,120.37,120.4201,270796,120.4129,28724441,1684428720000,762,\"270796.0\",\"28724441.0\",117.19,119.63,116.44,119.49,110597265,118.4998\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Get current state for a ticker"
+     },
+     "default": {
+      "description": "Unexpected error"
+     }
+    },
+    "summary": "Ticker",
+    "tags": [
+     "stocks:snapshot"
+    ]
+   }
+  },
+  "/v3/reference/dividends": {
+   "get": {
+    "description": "Get a list of historical cash dividends, including the ticker symbol,\ndeclaration date, ex-dividend date, record date, pay date, frequency,\nand amount.",
+    "operationId": "ListDividends",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "in": "query",
+      "name": "ticker",
+      "schema": {
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "string"
+      }
+     },
+     {
+      "description": "Query by ex-dividend date with the format YYYY-MM-DD.",
+      "in": "query",
+      "name": "ex_dividend_date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "string"
+      }
+     },
+     {
+      "description": "Query by record date with the format YYYY-MM-DD.",
+      "in": "query",
+      "name": "record_date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "string"
+      }
+     },
+     {
+      "description": "Query by declaration date with the format YYYY-MM-DD.",
+      "in": "query",
+      "name": "declaration_date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "string"
+      }
+     },
+     {
+      "description": "Query by pay date with the format YYYY-MM-DD.",
+      "in": "query",
+      "name": "pay_date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "string"
+      }
+     },
+     {
+      "description": "Query by the number of times per year the dividend is paid out.  Possible values are 0 (one-time), 1 (annually), 2 (bi-annually), 4 (quarterly), 12 (monthly), 24 (bi-monthly), and 52 (weekly).",
+      "in": "query",
+      "name": "frequency",
+      "schema": {
+       "enum": [
+        0,
+        1,
+        2,
+        4,
+        12,
+        24,
+        52
+       ],
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Query by the cash amount of the dividend.",
+      "in": "query",
+      "name": "cash_amount",
+      "schema": {
+       "type": "number"
+      },
+      "x-polygon-filter-field": {
+       "range": true,
+       "type": "number"
+      }
+     },
+     {
+      "description": "Query by the type of dividend. Dividends that have been paid and/or are expected to be paid on consistent schedules are denoted as CD.\nSpecial Cash dividends that have been paid that are infrequent or unusual, and/or can not be expected to occur in the future are denoted as SC.",
+      "in": "query",
+      "name": "dividend_type",
+      "schema": {
+       "description": "The type of dividend. Dividends that have been paid and/or are expected to be paid on consistent schedules are denoted as CD.\nSpecial Cash dividends that have been paid that are infrequent or unusual, and/or can not be expected to occur in the future are denoted as SC.\nLong-Term and Short-Term capital gain distributions are denoted as LT and ST, respectively.",
+       "enum": [
+        "CD",
+        "SC",
+        "LT",
+        "ST"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.gte",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.gt",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.lte",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.lt",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ex_dividend_date.",
+      "in": "query",
+      "name": "ex_dividend_date.gte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ex_dividend_date.",
+      "in": "query",
+      "name": "ex_dividend_date.gt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ex_dividend_date.",
+      "in": "query",
+      "name": "ex_dividend_date.lte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ex_dividend_date.",
+      "in": "query",
+      "name": "ex_dividend_date.lt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by record_date.",
+      "in": "query",
+      "name": "record_date.gte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by record_date.",
+      "in": "query",
+      "name": "record_date.gt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by record_date.",
+      "in": "query",
+      "name": "record_date.lte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by record_date.",
+      "in": "query",
+      "name": "record_date.lt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by declaration_date.",
+      "in": "query",
+      "name": "declaration_date.gte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by declaration_date.",
+      "in": "query",
+      "name": "declaration_date.gt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by declaration_date.",
+      "in": "query",
+      "name": "declaration_date.lte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by declaration_date.",
+      "in": "query",
+      "name": "declaration_date.lt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by pay_date.",
+      "in": "query",
+      "name": "pay_date.gte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by pay_date.",
+      "in": "query",
+      "name": "pay_date.gt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by pay_date.",
+      "in": "query",
+      "name": "pay_date.lte",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by pay_date.",
+      "in": "query",
+      "name": "pay_date.lt",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by cash_amount.",
+      "in": "query",
+      "name": "cash_amount.gte",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "description": "Range by cash_amount.",
+      "in": "query",
+      "name": "cash_amount.gt",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "description": "Range by cash_amount.",
+      "in": "query",
+      "name": "cash_amount.lte",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "description": "Range by cash_amount.",
+      "in": "query",
+      "name": "cash_amount.lt",
+      "schema": {
+       "type": "number"
+      }
+     },
+     {
+      "description": "Order results based on the `sort` field.",
+      "in": "query",
+      "name": "order",
+      "schema": {
+       "enum": [
+        "asc",
+        "desc"
+       ],
+       "example": "asc",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Limit the number of results returned, default is 10 and max is 1000.",
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "default": 10,
+       "example": 10,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Sort field used for ordering.",
+      "in": "query",
+      "name": "sort",
+      "schema": {
+       "default": "ex_dividend_date",
+       "enum": [
+        "ex_dividend_date",
+        "pay_date",
+        "declaration_date",
+        "record_date",
+        "cash_amount",
+        "ticker"
+       ],
+       "example": "ex_dividend_date",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "description": "A list of dividends.",
+         "example": {
+          "next_url": "https://api.polygon.io/v3/reference/dividends/AAPL?cursor=YWN0aXZlPXRydWUmZGF0ZT0yMDIxLTA0LTI1JmxpbWl0PTEmb3JkZXI9YXNjJnBhZ2VfbWFya2VyPUElN0M5YWRjMjY0ZTgyM2E1ZjBiOGUyNDc5YmZiOGE1YmYwNDVkYzU0YjgwMDcyMWE2YmI1ZjBjMjQwMjU4MjFmNGZiJnNvcnQ9dGlja2Vy",
+          "request_id": "6a7e466379af0a71039d60cc78e72282",
+          "results": [
+           {
+            "cash_amount": 0.22,
+            "declaration_date": "2021-10-28",
+            "dividend_type": "CD",
+            "ex_dividend_date": "2021-11-05",
+            "frequency": 4,
+            "id": "E8e3c4f794613e9205e2f178a36c53fcc57cdabb55e1988c87b33f9e52e221444",
+            "pay_date": "2021-11-11",
+            "record_date": "2021-11-08",
+            "ticker": "AAPL"
+           },
+           {
+            "cash_amount": 0.22,
+            "declaration_date": "2021-07-27",
+            "dividend_type": "CD",
+            "ex_dividend_date": "2021-08-06",
+            "frequency": 4,
+            "id": "E6436c5475706773f03490acf0b63fdb90b2c72bfeed329a6eb4afc080acd80ae",
+            "pay_date": "2021-08-12",
+            "record_date": "2021-08-09",
+            "ticker": "AAPL"
+           }
+          ],
+          "status": "OK"
+         },
+         "properties": {
+          "next_url": {
+           "description": "If present, this value can be used to fetch the next page of data.",
+           "type": "string"
+          },
+          "request_id": {
+           "description": "A request id assigned by the server.",
+           "type": "string"
+          },
+          "results": {
+           "description": "An array of results containing the requested data.",
+           "items": {
+            "properties": {
+             "cash_amount": {
+              "description": "The cash amount of the dividend per share owned.",
+              "type": "number",
+              "x-polygon-go-field-tags": {
+               "tags": [
+                {
+                 "key": "binding",
+                 "value": "required"
+                }
+               ]
+              }
+             },
+             "currency": {
+              "description": "The currency in which the dividend is paid.",
+              "type": "string"
+             },
+             "declaration_date": {
+              "description": "The date that the dividend was announced.",
+              "type": "string"
+             },
+             "dividend_type": {
+              "description": "The type of dividend. Dividends that have been paid and/or are expected to be paid on consistent schedules are denoted as CD.\nSpecial Cash dividends that have been paid that are infrequent or unusual, and/or can not be expected to occur in the future are denoted as SC.\nLong-Term and Short-Term capital gain distributions are denoted as LT and ST, respectively.",
+              "enum": [
+               "CD",
+               "SC",
+               "LT",
+               "ST"
+              ],
+              "type": "string"
+             },
+             "ex_dividend_date": {
+              "description": "The date that the stock first trades without the dividend, determined by the exchange.",
+              "type": "string"
+             },
+             "frequency": {
+              "description": "The number of times per year the dividend is paid out. Possible values are 0 (one-time), 1 (annually), 2 (bi-annually), 4 (quarterly), 12 (monthly), 24 (bi-monthly), and 52 (weekly).",
+              "type": "integer"
+             },
+             "id": {
+              "description": "The unique identifier of the dividend.",
+              "type": "string"
+             },
+             "pay_date": {
+              "description": "The date that the dividend is paid out.",
+              "type": "string"
+             },
+             "record_date": {
+              "description": "The date that the stock must be held to receive the dividend, set by the company.",
+              "type": "string"
+             },
+             "ticker": {
+              "description": "The ticker symbol of the dividend.",
+              "type": "string"
+             }
+            },
+            "required": [
+             "ticker",
+             "ex_dividend_date",
+             "frequency",
+             "cash_amount",
+             "dividend_type",
+             "id"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "type": "string"
+          }
+         },
+         "required": [
+          "request_id"
+         ],
+         "type": "object"
+        }
+       },
+       "text/csv": {
+        "schema": {
+         "example": "ticker,declaration_date,ex_dividend_date,record_date,pay_date,frequency,cash_amount,dividend_type\nAAPL,2021-10-28,2021-11-05,2021-11-08,2021-11-11,4,0.22,CD\nAAPL,2021-07-27,2021-08-06,2021-08-09,2021-08-12,4,0.22,CD\n",
+         "type": "string"
+        }
+       }
+      },
+      "description": "OK"
+     }
+    },
+    "summary": "Dividends v3",
+    "tags": [
+     "reference:dividends"
+    ],
+    "x-polygon-paginate": {
+     "limit": {
+      "default": 10,
+      "max": 1000
+     },
+     "sort": {
+      "default": "ex_dividend_date",
+      "enum": [
+       "ex_dividend_date",
+       "pay_date",
+       "declaration_date",
+       "record_date",
+       "cash_amount",
+       "ticker"
+      ]
+     }
+    }
+   }
+  },
+  "/v3/reference/tickers": {
+   "get": {
+    "description": "Query all ticker symbols which are supported by Massive. This API currently includes Stocks/Equities, Indices, Forex, and Crypto.",
+    "operationId": "ListTickers",
+    "parameters": [
+     {
+      "description": "Specify a ticker symbol.\nDefaults to empty string which queries all tickers.",
+      "in": "query",
+      "name": "ticker",
+      "schema": {
+       "type": "string"
+      },
+      "x-polygon-filter-field": {
+       "range": true
+      }
+     },
+     {
+      "description": "Specify the type of the tickers. Find the types that we support via our [Ticker Types API](https://massive.com/docs/rest/stocks/tickers/ticker-types).\nDefaults to empty string which queries all types.",
+      "in": "query",
+      "name": "type",
+      "schema": {
+       "enum": [
+        "CS",
+        "ADRC",
+        "ADRP",
+        "ADRR",
+        "UNIT",
+        "RIGHT",
+        "PFD",
+        "FUND",
+        "SP",
+        "WARRANT",
+        "INDEX",
+        "ETF",
+        "ETN",
+        "OS",
+        "GDR",
+        "OTHER",
+        "NYRS",
+        "AGEN",
+        "EQLK",
+        "BOND",
+        "ADRW",
+        "BASKET",
+        "LT"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "Filter by market type. By default all markets are included.",
+      "in": "query",
+      "name": "market",
+      "schema": {
+       "enum": [
+        "stocks",
+        "crypto",
+        "fx",
+        "otc",
+        "indices"
+       ],
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify the asset's primary exchange Market Identifier Code (MIC) according to [ISO 10383](https://www.iso20022.org/market-identifier-codes).\nDefaults to empty string which queries all exchanges.",
+      "in": "query",
+      "name": "exchange",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify the CUSIP code of the asset you want to search for. Find more information about CUSIP codes [at their website](https://www.cusip.com/identifiers.html#/CUSIP).\nDefaults to empty string which queries all CUSIPs.\n\nNote: Although you can query by CUSIP, due to legal reasons we do not return the CUSIP in the response.",
+      "in": "query",
+      "name": "cusip",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify the CIK of the asset you want to search for. Find more information about CIK codes [at their website](https://www.sec.gov/edgar/searchedgar/cik.htm).\nDefaults to empty string which queries all CIKs.",
+      "in": "query",
+      "name": "cik",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify a point in time to retrieve tickers available on that date.\nDefaults to the most recent available date.",
+      "in": "query",
+      "name": "date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Search for terms within the ticker and/or company name.",
+      "in": "query",
+      "name": "search",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify if the tickers returned should be actively traded on the queried date. Default is true.",
+      "example": true,
+      "in": "query",
+      "name": "active",
+      "schema": {
+       "type": "boolean"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.gte",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.gt",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.lte",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Range by ticker.",
+      "in": "query",
+      "name": "ticker.lt",
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Order results based on the `sort` field.",
+      "in": "query",
+      "name": "order",
+      "schema": {
+       "enum": [
+        "asc",
+        "desc"
+       ],
+       "example": "asc",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Limit the number of results returned, default is 100 and max is 1000.",
+      "in": "query",
+      "name": "limit",
+      "schema": {
+       "default": 100,
+       "example": 100,
+       "maximum": 1000,
+       "minimum": 1,
+       "type": "integer"
+      }
+     },
+     {
+      "description": "Sort field used for ordering.",
+      "in": "query",
+      "name": "sort",
+      "schema": {
+       "default": "ticker",
+       "enum": [
+        "ticker",
+        "name",
+        "market",
+        "locale",
+        "primary_exchange",
+        "type",
+        "currency_symbol",
+        "currency_name",
+        "base_currency_symbol",
+        "base_currency_name",
+        "cik",
+        "composite_figi",
+        "share_class_figi",
+        "last_updated_utc",
+        "delisted_utc"
+       ],
+       "example": "ticker",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "count": 1,
+         "next_url": "https://api.polygon.io/v3/reference/tickers?cursor=YWN0aXZlPXRydWUmZGF0ZT0yMDIxLTA0LTI1JmxpbWl0PTEmb3JkZXI9YXNjJnBhZ2VfbWFya2VyPUElN0M5YWRjMjY0ZTgyM2E1ZjBiOGUyNDc5YmZiOGE1YmYwNDVkYzU0YjgwMDcyMWE2YmI1ZjBjMjQwMjU4MjFmNGZiJnNvcnQ9dGlja2Vy",
+         "request_id": "e70013d92930de90e089dc8fa098888e",
+         "results": [
+          {
+           "active": true,
+           "cik": "0001090872",
+           "composite_figi": "BBG000BWQYZ5",
+           "currency_name": "usd",
+           "last_updated_utc": "2021-04-25T00:00:00Z",
+           "locale": "us",
+           "market": "stocks",
+           "name": "Agilent Technologies Inc.",
+           "primary_exchange": "XNYS",
+           "share_class_figi": "BBG001SCTQY4",
+           "ticker": "A",
+           "type": "CS"
+          }
+         ],
+         "status": "OK"
+        },
+        "schema": {
+         "properties": {
+          "count": {
+           "description": "The total number of results for this request.",
+           "type": "integer"
+          },
+          "next_url": {
+           "description": "If present, this value can be used to fetch the next page of data.",
+           "type": "string"
+          },
+          "request_id": {
+           "description": "A request id assigned by the server.",
+           "type": "string"
+          },
+          "results": {
+           "description": "An array of tickers that match your query.\n\nNote: Although you can query by CUSIP, due to legal reasons we do not return the CUSIP in the response.",
+           "items": {
+            "properties": {
+             "active": {
+              "description": "Whether or not the asset is actively traded. False means the asset has been delisted.",
+              "type": "boolean"
+             },
+             "base_currency_name": {
+              "description": "The name of the currency that this asset is priced against.",
+              "type": "string"
+             },
+             "base_currency_symbol": {
+              "description": "The ISO 4217 code of the currency that this asset is priced against.",
+              "type": "string"
+             },
+             "cik": {
+              "description": "The CIK number for this ticker. Find more information [here](https://en.wikipedia.org/wiki/Central_Index_Key).",
+              "type": "string"
+             },
+             "composite_figi": {
+              "description": "The composite OpenFIGI number for this ticker. Find more information [here](https://www.openfigi.com/about/figi)",
+              "type": "string"
+             },
+             "currency_name": {
+              "description": "The name of the currency that this asset is traded with.",
+              "type": "string"
+             },
+             "currency_symbol": {
+              "description": "The ISO 4217 code of the currency that this asset is traded with.",
+              "type": "string"
+             },
+             "delisted_utc": {
+              "description": "The last date that the asset was traded.",
+              "format": "date-time",
+              "type": "string"
+             },
+             "last_updated_utc": {
+              "description": "The information is accurate up to this time.",
+              "format": "date-time",
+              "type": "string"
+             },
+             "locale": {
+              "description": "The locale of the asset.",
+              "enum": [
+               "us",
+               "global"
+              ],
+              "type": "string"
+             },
+             "market": {
+              "description": "The market type of the asset.",
+              "enum": [
+               "stocks",
+               "crypto",
+               "fx",
+               "otc",
+               "indices"
+              ],
+              "type": "string"
+             },
+             "name": {
+              "description": "The name of the asset. For stocks/equities this will be the companies registered name. For crypto/fx this will be the name of the currency or coin pair.",
+              "type": "string"
+             },
+             "primary_exchange": {
+              "description": "The ISO code of the primary listing exchange for this asset.",
+              "type": "string"
+             },
+             "share_class_figi": {
+              "description": "The share Class OpenFIGI number for this ticker. Find more information [here](https://www.openfigi.com/about/figi)",
+              "type": "string"
+             },
+             "ticker": {
+              "description": "The exchange symbol that this item is traded under.",
+              "type": "string"
+             },
+             "type": {
+              "description": "The type of the asset. Find the types that we support via our [Ticker Types API](https://massive.com/docs/rest/stocks/tickers/ticker-types).",
+              "type": "string"
+             }
+            },
+            "required": [
+             "ticker",
+             "name",
+             "market",
+             "locale"
+            ],
+            "type": "object",
+            "x-polygon-go-type": {
+             "name": "ReferenceTicker",
+             "path": "github.com/polygon-io/go-lib-models/v2/globals"
+            }
+           },
+           "type": "array"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       },
+       "text/csv": {
+        "example": "ticker,name,market,locale,primary_exchange,type,active,currency_name,cik,composite_figi,share_class_figi,last_updated_utc\nA,Agilent Technologies Inc.,stocks,us,XNYS,CS,true,usd,0001090872,BBG000BWQYZ5,BBG001SCTQY4,2021-04-25T00:00:00Z\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Reference Tickers."
+     },
+     "401": {
+      "description": "Unauthorized - Check our API Key and account status"
+     }
+    },
+    "summary": "Tickers",
+    "tags": [
+     "reference:tickers:list"
+    ],
+    "x-polygon-paginate": {
+     "limit": {
+      "default": 100,
+      "max": 1000
+     },
+     "sort": {
+      "default": "ticker",
+      "enum": [
+       "ticker",
+       "name",
+       "market",
+       "locale",
+       "primary_exchange",
+       "type",
+       "currency_symbol",
+       "currency_name",
+       "base_currency_symbol",
+       "base_currency_name",
+       "cik",
+       "composite_figi",
+       "share_class_figi",
+       "last_updated_utc",
+       "delisted_utc"
+      ]
+     }
+    }
+   }
+  },
+  "/v3/reference/tickers/types": {
+   "get": {
+    "description": "List all ticker types that Massive has.",
+    "operationId": "ListTickerTypes",
+    "parameters": [
+     {
+      "description": "Filter by asset class.",
+      "in": "query",
+      "name": "asset_class",
+      "schema": {
+       "description": "An identifier for a group of similar financial instruments.",
+       "enum": [
+        "stocks",
+        "options",
+        "crypto",
+        "fx",
+        "indices"
+       ],
+       "example": "stocks",
+       "type": "string"
+      }
+     },
+     {
+      "description": "Filter by locale.",
+      "in": "query",
+      "name": "locale",
+      "schema": {
+       "description": "An identifier for a geographical location.",
+       "enum": [
+        "us",
+        "global"
+       ],
+       "example": "us",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "count": {
+           "description": "The total number of results for this request.",
+           "example": 1,
+           "type": "integer"
+          },
+          "request_id": {
+           "description": "A request ID assigned by the server.",
+           "example": "31d59dda-80e5-4721-8496-d0d32a654afe",
+           "type": "string"
+          },
+          "results": {
+           "description": "An array of results containing the requested data.",
+           "items": {
+            "description": "Describes the type of financial instrument represented by a ticker.",
+            "properties": {
+             "asset_class": {
+              "description": "An identifier for a group of similar financial instruments.",
+              "enum": [
+               "stocks",
+               "options",
+               "crypto",
+               "fx",
+               "indices"
+              ],
+              "example": "stocks",
+              "type": "string"
+             },
+             "code": {
+              "description": "A code used by Massive to refer to this ticker type.",
+              "example": "CS",
+              "type": "string"
+             },
+             "description": {
+              "description": "A short description of this ticker type.",
+              "example": "Common Stock",
+              "type": "string"
+             },
+             "locale": {
+              "description": "An identifier for a geographical location.",
+              "enum": [
+               "us",
+               "global"
+              ],
+              "example": "us",
+              "type": "string"
+             }
+            },
+            "required": [
+             "code",
+             "description",
+             "asset_class",
+             "locale"
+            ],
+            "type": "object"
+           },
+           "type": "array"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "example": "OK",
+           "type": "string"
+          }
+         },
+         "required": [
+          "status",
+          "request_id"
+         ],
+         "type": "object"
+        }
+       },
+       "text/csv": {
+        "example": "code,description,asset_class,locale\nCS,Common Stock,stocks,us\nPFD,Preferred Stock,stocks,us\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "OK"
+     },
+     "400": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "count": {
+           "description": "The total number of results for this request.",
+           "example": 1,
+           "type": "integer"
+          },
+          "request_id": {
+           "description": "A request ID assigned by the server.",
+           "example": "31d59dda-80e5-4721-8496-d0d32a654afe",
+           "type": "string"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "example": "OK",
+           "type": "string"
+          }
+         },
+         "required": [
+          "status",
+          "request_id"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "a query parameter was malformed"
+     },
+     "default": {
+      "content": {
+       "application/json": {
+        "schema": {
+         "properties": {
+          "count": {
+           "description": "The total number of results for this request.",
+           "example": 1,
+           "type": "integer"
+          },
+          "request_id": {
+           "description": "A request ID assigned by the server.",
+           "example": "31d59dda-80e5-4721-8496-d0d32a654afe",
+           "type": "string"
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "example": "OK",
+           "type": "string"
+          }
+         },
+         "required": [
+          "status",
+          "request_id"
+         ],
+         "type": "object"
+        }
+       }
+      },
+      "description": "an unknown error occurred"
+     }
+    },
+    "summary": "Ticker Types",
+    "tags": [
+     "reference:tickers:types"
+    ]
+   }
+  },
+  "/v3/reference/tickers/{ticker}": {
+   "get": {
+    "description": "Get a single ticker supported by Massive. This response will have detailed information about the ticker and the company behind it.",
+    "operationId": "GetTicker",
+    "parameters": [
+     {
+      "description": "Specify a case-sensitive ticker symbol. For example, AAPL represents Apple Inc.",
+      "example": "AAPL",
+      "in": "path",
+      "name": "ticker",
+      "required": true,
+      "schema": {
+       "type": "string"
+      }
+     },
+     {
+      "description": "Specify a point in time to get information about the ticker available on that date.\nFields that describe the security, including name, type, primary_exchange and list_date, reflect the security trading under this ticker on that date.\nFor example, ASND returns type ADRC and list_date 2015-01-28 for 2026-04-17, and type CS and list_date 2026-04-20 from 2026-04-20, when its American Depositary Shares were exchanged for ordinary shares.\nSome fields may be empty for older dates.\n\nWhen retrieving information from SEC filings, we compare this date with the period of report date on the SEC filing.\n\nFor example, consider an SEC filing submitted by AAPL on 2019-07-31, with a period of report date ending on 2019-06-29.\nThat means that the filing was submitted on 2019-07-31, but the filing was created based on information from 2019-06-29.\nIf you were to query for AAPL details on 2019-06-29, the ticker details would include information from the SEC filing.\n\nDefaults to the most recent available date.",
+      "in": "query",
+      "name": "date",
+      "schema": {
+       "format": "date",
+       "type": "string"
+      }
+     }
+    ],
+    "responses": {
+     "200": {
+      "content": {
+       "application/json": {
+        "example": {
+         "request_id": "31d59dda-80e5-4721-8496-d0d32a654afe",
+         "results": {
+          "active": true,
+          "address": {
+           "address1": "One Apple Park Way",
+           "city": "Cupertino",
+           "postal_code": "95014",
+           "state": "CA"
+          },
+          "branding": {
+           "icon_url": "https://api.polygon.io/v1/reference/company-branding/d3d3LmFwcGxlLmNvbQ/images/2022-01-10_icon.png",
+           "logo_url": "https://api.polygon.io/v1/reference/company-branding/d3d3LmFwcGxlLmNvbQ/images/2022-01-10_logo.svg"
+          },
+          "cik": "0000320193",
+          "composite_figi": "BBG000B9XRY4",
+          "currency_name": "usd",
+          "description": "Apple designs a wide variety of consumer electronic devices, including smartphones (iPhone), tablets (iPad), PCs (Mac), smartwatches (Apple Watch), AirPods, and TV boxes (Apple TV), among others. The iPhone makes up the majority of Apple's total revenue. In addition, Apple offers its customers a variety of services such as Apple Music, iCloud, Apple Care, Apple TV+, Apple Arcade, Apple Card, and Apple Pay, among others. Apple's products run internally developed software and semiconductors, and the firm is well known for its integration of hardware, software and services. Apple's products are distributed online as well as through company-owned stores and third-party retailers. The company generates roughly 40% of its revenue from the Americas, with the remainder earned internationally.",
+          "homepage_url": "https://www.apple.com",
+          "list_date": "1980-12-12",
+          "locale": "us",
+          "market": "stocks",
+          "market_cap": 2771126040150,
+          "name": "Apple Inc.",
+          "phone_number": "(408) 996-1010",
+          "primary_exchange": "XNAS",
+          "round_lot": 100,
+          "share_class_figi": "BBG001S5N8V8",
+          "share_class_shares_outstanding": 16406400000,
+          "sic_code": "3571",
+          "sic_description": "ELECTRONIC COMPUTERS",
+          "ticker": "AAPL",
+          "ticker_root": "AAPL",
+          "total_employees": 154000,
+          "type": "CS",
+          "weighted_shares_outstanding": 16334371000
+         },
+         "status": "OK"
+        },
+        "schema": {
+         "properties": {
+          "count": {
+           "description": "The total number of results for this request.",
+           "type": "integer"
+          },
+          "request_id": {
+           "description": "A request id assigned by the server.",
+           "type": "string"
+          },
+          "results": {
+           "description": "Ticker with details.",
+           "properties": {
+            "active": {
+             "description": "Whether or not the asset is actively traded. False means the asset has been delisted.",
+             "type": "boolean"
+            },
+            "address": {
+             "description": "Company headquarters address details.",
+             "properties": {
+              "address1": {
+               "description": "The first line of the company's headquarters address.",
+               "type": "string"
+              },
+              "address2": {
+               "description": "The second line of the company's headquarters address, if applicable.",
+               "type": "string"
+              },
+              "city": {
+               "description": "The city of the company's headquarters address.",
+               "type": "string"
+              },
+              "postal_code": {
+               "description": "The postal code of the company's headquarters address.",
+               "type": "string"
+              },
+              "state": {
+               "description": "The state of the company's headquarters address.",
+               "type": "string"
+              }
+             },
+             "type": "object"
+            },
+            "branding": {
+             "description": "Provides URLs aiding in visual identification.",
+             "properties": {
+              "icon_url": {
+               "description": "A link to this ticker's company's icon. Icon's are generally smaller, square images that represent the company at a glance.\nNote that you must provide an API key when accessing this URL. See the \"Authentication\" section at the top of this page for more details.",
+               "type": "string"
+              },
+              "logo_url": {
+               "description": "A link to this ticker's company's logo.\nNote that you must provide an API key when accessing this URL. See the \"Authentication\" section at the top of this page for more details.",
+               "type": "string"
+              }
+             },
+             "type": "object"
+            },
+            "cik": {
+             "description": "The CIK number for this ticker. Find more information [here](https://en.wikipedia.org/wiki/Central_Index_Key).",
+             "type": "string"
+            },
+            "composite_figi": {
+             "description": "The composite OpenFIGI number for this ticker. Find more information [here](https://www.openfigi.com/about/figi)",
+             "type": "string"
+            },
+            "currency_name": {
+             "description": "The name of the currency that this asset is traded with.",
+             "type": "string"
+            },
+            "delisted_utc": {
+             "description": "The last date that the asset was traded.",
+             "format": "date-time",
+             "type": "string"
+            },
+            "description": {
+             "description": "A description of the company and what they do/offer.",
+             "type": "string"
+            },
+            "homepage_url": {
+             "description": "The URL of the company's website homepage.",
+             "type": "string"
+            },
+            "list_date": {
+             "description": "The date the security currently trading under this ticker was first publicly listed, in the format YYYY-MM-DD.\nIf a corporate action replaces the security behind the ticker, such as American Depositary Shares being exchanged for ordinary shares under the same symbol, this is the new security's listing date.\nA move to a different exchange does not change it.\nUse the date parameter to get the value as of an earlier date.",
+             "type": "string"
+            },
+            "locale": {
+             "description": "The locale of the asset.",
+             "enum": [
+              "us",
+              "global"
+             ],
+             "type": "string"
+            },
+            "market": {
+             "description": "The market type of the asset.",
+             "enum": [
+              "stocks",
+              "crypto",
+              "fx",
+              "otc",
+              "indices"
+             ],
+             "type": "string"
+            },
+            "market_cap": {
+             "description": "The most recent close price of the ticker multiplied by weighted outstanding shares.",
+             "format": "double",
+             "type": "number"
+            },
+            "name": {
+             "description": "The name of the asset. For stocks/equities this will be the companies registered name. For crypto/fx this will be the name of the currency or coin pair.",
+             "type": "string"
+            },
+            "phone_number": {
+             "description": "The phone number for the company behind this ticker.",
+             "type": "string"
+            },
+            "primary_exchange": {
+             "description": "The ISO code of the primary listing exchange for this asset.",
+             "type": "string"
+            },
+            "round_lot": {
+             "description": "Round lot size of this security.",
+             "format": "double",
+             "type": "number"
+            },
+            "share_class_figi": {
+             "description": "The share Class OpenFIGI number for this ticker. Find more information [here](https://www.openfigi.com/about/figi)",
+             "type": "string"
+            },
+            "share_class_shares_outstanding": {
+             "description": "The recorded number of outstanding shares for this particular share class.",
+             "format": "double",
+             "type": "number"
+            },
+            "sic_code": {
+             "description": "The standard industrial classification code for this ticker.  For a list of SIC Codes, see the SEC's <a rel=\"nofollow\" target=\"_blank\" href=\"https://www.sec.gov/info/edgar/siccodes.htm\">SIC Code List</a>.",
+             "type": "string"
+            },
+            "sic_description": {
+             "description": "A description of this ticker's SIC code.",
+             "type": "string"
+            },
+            "ticker": {
+             "description": "The exchange symbol that this item is traded under.",
+             "type": "string"
+            },
+            "ticker_root": {
+             "description": "The root of a specified ticker. For example, the root of BRK.A is BRK.",
+             "type": "string"
+            },
+            "ticker_suffix": {
+             "description": "The suffix of a specified ticker. For example, the suffix of BRK.A is A.",
+             "type": "string"
+            },
+            "total_employees": {
+             "description": "The approximate number of employees for the company.",
+             "type": "number"
+            },
+            "type": {
+             "description": "The type of the asset. Find the types that we support via our [Ticker Types API](https://massive.com/docs/rest/stocks/tickers/ticker-types).",
+             "type": "string"
+            },
+            "weighted_shares_outstanding": {
+             "description": "The shares outstanding calculated assuming all shares of other share classes are converted to this share class.",
+             "format": "double",
+             "type": "number"
+            }
+           },
+           "required": [
+            "ticker",
+            "name",
+            "market",
+            "locale",
+            "active",
+            "currency_name"
+           ],
+           "type": "object",
+           "x-polygon-go-type": {
+            "name": "ReferenceTicker",
+            "path": "github.com/polygon-io/go-lib-models/v2/globals"
+           }
+          },
+          "status": {
+           "description": "The status of this request's response.",
+           "type": "string"
+          }
+         },
+         "type": "object"
+        }
+       },
+       "text/csv": {
+        "example": "ticker,name,market,locale,primary_exchange,type,active,currency_name,cik,composite_figi,share_class_figi,share_class_shares_outstanding,weighted_shares_outstanding,round_lot,market_cap,phone_number,address1,address2,city,state,postal_code,sic_code,sic_description,ticker_root,total_employees,list_date,homepage_url,description,branding/logo_url,branding/icon_url\nAAPL,Apple Inc.,stocks,us,XNAS,CS,true,usd,0000320193,BBG000B9XRY4,BBG001S5N8V8,16406400000,16334371000,100,2771126040150,(408) 996-1010,One Apple Park Way,,Cupertino,CA,95014,3571,ELECTRONIC COMPUTERS,AAPL,154000,1980-12-12,https://www.apple.com,\"Apple designs a wide variety of consumer electronic devices, including smartphones (iPhone), tablets (iPad), PCs (Mac), smartwatches (Apple Watch), AirPods, and TV boxes (Apple TV), among others. The iPhone makes up the majority of Apple's total revenue. In addition, Apple offers its customers a variety of services such as Apple Music, iCloud, Apple Care, Apple TV+, Apple Arcade, Apple Card, and Apple Pay, among others. Apple's products run internally developed software and semiconductors, and the firm is well known for its integration of hardware, software and services. Apple's products are distributed online as well as through company-owned stores and third-party retailers. The company generates roughly 40% of its revenue from the Americas, with the remainder earned internationally.\",https://api.polygon.io/v1/reference/company-branding/d3d3LmFwcGxlLmNvbQ/images/2022-01-10_logo.svg,https://api.polygon.io/v1/reference/company-branding/d3d3LmFwcGxlLmNvbQ/images/2022-01-10_icon.png\n",
+        "schema": {
+         "type": "string"
+        }
+       }
+      },
+      "description": "Reference Tickers."
+     },
+     "401": {
+      "description": "Unauthorized - Check our API Key and account status"
+     }
+    },
+    "summary": "Ticker Details v3",
+    "tags": [
+     "reference:tickers:get"
+    ]
+   }
+  }
+ },
+ "components": {}
+}
